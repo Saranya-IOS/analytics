@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Line, Doughnut, Bar } from 'react-chartjs-2';
 import {
@@ -13,6 +13,12 @@ import {
   ArcElement,
   BarElement
 } from 'chart.js';
+
+// Import components
+import Events from './Events';
+import Reports from './Reports';
+import Settings from './Settings';
+import Users from './Users';
 
 // Register ChartJS components
 ChartJS.register(
@@ -132,6 +138,7 @@ export default function Dashboard() {
               <div className="bg-white rounded-lg shadow p-6">
                 <h2 className="text-xl font-bold mb-4">Event Types</h2>
                 <div className="h-80">
+                  
                   <Doughnut 
                     data={eventTypesData}
                     options={{
@@ -158,26 +165,13 @@ export default function Dashboard() {
           </>
         );
       case 'events':
-        return (
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-2xl font-bold mb-6">Events</h2>
-            {/* Add your events content here */}
-          </div>
-        );
+        return <Events />;
       case 'reports':
-        return (
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-2xl font-bold mb-6">Reports</h2>
-            {/* Add your reports content here */}
-          </div>
-        );
+        return <Reports />;
       case 'settings':
-        return (
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-2xl font-bold mb-6">Settings</h2>
-            {/* Add your settings content here */}
-          </div>
-        );
+        return <Settings />;
+      case 'users':
+        return <Users />;
       default:
         return null;
     }
@@ -205,6 +199,12 @@ export default function Dashboard() {
               className={`w-full flex items-center space-x-2 py-2 px-4 rounded-lg ${activeTab === 'events' ? 'bg-blue-600' : 'hover:bg-gray-800'}`}
             >
               <span>Events</span>
+            </button>
+            <button 
+              onClick={() => setActiveTab('users')}
+              className={`w-full flex items-center space-x-2 py-2 px-4 rounded-lg ${activeTab === 'users' ? 'bg-blue-600' : 'hover:bg-gray-800'}`}
+            >
+              <span>Users</span>
             </button>
             <button 
               onClick={() => setActiveTab('reports')}
