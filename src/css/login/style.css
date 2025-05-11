@@ -1,0 +1,130 @@
+ body, html {
+  height: 100%;
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+}
+.gradient-bg {
+  height: 100%;
+  background: linear-gradient(135deg, #3ab5f7, #d43bf5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* Login Card */ .login-card {
+  background: white;
+  border-radius: 20px;
+  padding: 40px 30px;
+  width: 380px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+.login-card h2 {
+  margin-bottom: 25px;
+  color: #222;
+  font-size: 28px;
+}
+/* Input Fields */ .input-container {
+  display: flex;
+  align-items: center;
+  background: #f2f2f2;
+  border-radius: 10px;
+  padding: 10px 15px;
+  margin-bottom: 20px;
+}
+.input-container i {
+  margin-right: 10px;
+  color: #aaa;
+}
+.input-container input {
+  border: none;
+  outline: none;
+  background: transparent;
+  width: 100%;
+  font-size: 15px;
+}
+label {
+  text-align: left;
+  display: block;
+  margin-bottom: 5px;
+  font-size: 14px;
+  color: #555;
+}
+/* Forgot Password */ .forgot-pass {
+  text-align: right;
+  margin-bottom: 20px;
+}
+.forgot-pass a {
+  font-size: 13px;
+  color: #888;
+  text-decoration: none;
+}
+/* Gradient Button */ .login-btn {
+  width: 100%;
+  padding: 12px 0;
+  background: linear-gradient(to right, #3ab5f7, #d43bf5);
+  border: none;
+  color: white;
+  font-size: 15px;
+  font-weight: bold;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.login-btn:hover {
+  opacity: 0.9;
+}
+/* Or Text */ .or-text {
+  margin: 20px 0 10px;
+  font-size: 13px;
+  color: #aaa;
+}
+/* Social Icons */ .social-icons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  padding-top: 20px;
+  margin-bottom: 20px;
+}
+.social-icons a {
+  background: #eee;
+  padding: 10px;
+  border-radius: 50%;
+  color: #555;
+  text-decoration: none;
+  transition: 0.3s;
+}
+.social-icons a:hover {
+  background: #ddd;
+}
+/* Bottom Sign Up */ .signup-bottom {
+  font-size: 13px;
+  color: #555;
+}
+.signup-bottom a {
+  text-decoration: none;
+  color: #d43bf5;
+  font-weight: bold;
+  padding-top: 20px;
+}
+
+input::placeholder {
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  color: #aaa;
+}
+ 
+input::-webkit-input-placeholder {
+  font-family: 'Poppins', sans-serif;
+}
+ 
+input:-moz-placeholder {
+  font-family: 'Poppins', sans-serif;
+}
+ 
+input::-moz-placeholder {
+  font-family: 'Poppins', sans-serif;
+}
+ 
+input:-ms-input-placeholder {
+  font-family: 'Poppins', sans-serif;
+}

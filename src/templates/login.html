@@ -1,0 +1,53 @@
+<!-- templates/login.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+        <meta charset="UTF-8">
+        <title>Login | Dashboard</title>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/login/style.css') }}">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+        {% include 'components/flash_messages.html' %}
+        <div class="gradient-bg">
+                <div class="login-card">
+                        <h2>Login</h2>
+
+                        <form method="POST">
+                                <label for="username">Email</label>
+                                <div class="input-container">
+                                        <i class="fas fa-user"></i>
+                                        <input type="text" id="email" name="admin_user_email" placeholder="Type your email"
+                                                required>
+                                </div>
+
+                                <label for="password">Password</label>
+                                <div class="input-container">
+                                        <i class="fas fa-lock"></i>
+                                        <input type="password" id="password" name="password"
+                                                placeholder="Type your password" required>
+                                </div>
+
+                                <div class="forgot-pass">
+                                        <a href="#">Forgot password?</a>
+                                </div>
+
+                                <button type="submit" class="login-btn">LOGIN</button>
+
+                                <div class="social-icons">
+                                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                                        <a href="#"><i class="fab fa-twitter"></i></a>
+                                        <a href="#"><i class="fab fa-google"></i></a>
+                                </div>
+
+                                <p class="signup-bottom"><br>Don't have any account ? <a href="{{ url_for('auth.signup') }}">SIGN UP</a></p>
+                        </form>
+                </div>
+        </div>
+</body>
+
+</html>

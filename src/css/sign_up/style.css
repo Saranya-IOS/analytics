@@ -1,0 +1,103 @@
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #3ab5f7, #d43bf5);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+  }
+
+  label {
+    text-align: left;
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14px;
+    color: #555;
+  }
+
+  .auth-card {
+    background: #fff;
+    padding: 40px 30px;
+    border-radius: 20px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+  }
+   
+  .auth-card h2 {
+    margin-bottom: 25px;
+    color: #333;
+  }
+   
+  .logo img {
+    width: 70px;
+    margin-bottom: 15px;
+  }
+   
+  .auth-form .input-group {
+    display: flex;
+    align-items: center;
+    background: #f1f1f1;
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 10px;
+  }
+   
+  .auth-form .input-group i {
+    margin-right: 10px;
+    color: #aaa;
+  }
+   
+  .auth-form input {
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: 16px;
+    flex: 1;
+  }
+   
+  .auth-form button {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(to right, #3ab5f7, #d43bf5);
+    color: white;
+    font-size: 16px;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.3s ease;
+  }
+   
+  .auth-form button:hover {
+    opacity: 0.9;
+  }
+   
+  .switch-link {
+    margin-top: 15px;
+    font-size: 14px;
+  }
+
+  input::placeholder {
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    color: #aaa;
+  }
+   
+  input::-webkit-input-placeholder {
+    font-family: 'Poppins', sans-serif;
+  }
+   
+  input:-moz-placeholder {
+    font-family: 'Poppins', sans-serif;
+  }
+   
+  input::-moz-placeholder {
+    font-family: 'Poppins', sans-serif;
+  }
+   
+  input:-ms-input-placeholder {
+    font-family: 'Poppins', sans-serif;
+  }
