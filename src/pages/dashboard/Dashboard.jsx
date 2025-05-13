@@ -5,217 +5,91 @@ import TopPagesChart from '../../components/graphs/TopPagesChart';
 import EventDistributionChart from '../../components/graphs/EventDistributionChart';
 import UserInteractionsChart from '../../components/graphs/UserInteractionsChart';
 import ScreenVisitedChart from '../../components/graphs/ScreenVisitedChart';
+import Events from './Events';
+import Reports from './Reports';
+import Settings from './Settings';
+import Users from './Users';
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [user, setUser] = useState(null);
-  const [timelineData, setTimelineData] = useState({
-    labels: [],
-    datasets: [
-      {
-        label: 'Users',
-        data: [],
-        fill: true,
-        borderColor: 'rgba(66, 99, 235, 1)',
-        backgroundColor: 'rgba(66, 99, 235, 0.1)',
-        tension: 0.4,
-        pointRadius: 3,
-        pointBackgroundColor: 'rgba(66, 99, 235, 1)',
-        pointBorderColor: '#fff',
-        pointBorderWidth: 2
-      },
-      {
-        label: 'Sessions',
-        data: [],
-        fill: true,
-        borderColor: 'rgb(66, 235, 156)',
-        backgroundColor: 'rgba(86, 235, 66, 0.1)',
-        tension: 0.4,
-        pointRadius: 3,
-        pointBackgroundColor: 'rgb(66, 235, 156)',
-        pointBorderColor: '#fff',
-        pointBorderWidth: 2
-      }
-    ]
-  });
+  
+  // ... (keep all your existing state and data fetching logic)
 
-  const [eventData, setEventData] = useState({
-    total_events: 0,
-    event_distribution: []
-  });
-
-  const [topPages, setTopPages] = useState([]);
-  const [userInteractions, setUserInteractions] = useState({
-    labels: [],
-    datasets: [
-      {
-        label: 'Touch',
-        data: [],
-        backgroundColor: '#36A2EB'
-      },
-      {
-        label: 'Scroll',
-        data: [],
-        backgroundColor: '#FF6384'
-      }
-    ]
-  });
-
-  const [screenVisited, setScreenVisited] = useState({
-    labels: [],
-    datasets: [{
-      label: 'Events',
-      data: [],
-      backgroundColor: '#36A2EB'
-    }]
-  });
-
-  const generateColorPairs = (count) => {
-    const predefinedBrightColors = [
-      '#FF5733', '#33C3FF', '#FF33F6', '#75FF33', '#FFC300',
-      '#8E44AD', '#FF6F61', '#00E6E6', '#FF8C00', '#1E90FF'
-    ];
-    const brightColors = [];
-    const dullColors = [];
-
-    for (let i = 0; i < count; i++) {
-      const base = predefinedBrightColors[i % predefinedBrightColors.length];
-      brightColors.push(base);
-      const r = parseInt(base.slice(1, 3), 16);
-      const g = parseInt(base.slice(3, 5), 16);
-      const b = parseInt(base.slice(5, 7), 16);
-      dullColors.push(`rgba(${r}, ${g}, ${b}, 0.5)`);
-    }
-    return { brightColors, dullColors };
-  };
-
-  const { brightColors, dullColors } = generateColorPairs(eventData.event_distribution.length);
-
-  // Navigation functions
-  const handleEventsClick = () => {
-    navigate('/events');
-  };
-
-  const handleUsersClick = () => {
-    navigate('/users');
-  };
-
-  const handleReportsClick = () => {
-    navigate('/reports');
-  };
-
-  const handleSettingsClick = () => {
-    navigate('/settings');
-  };
-
-  useEffect(() => {
-    const storedUser = localStorage.getItem('userData');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    } else {
-      navigate("/login");
-    }
-    
-    fetchDashboardData();
-  }, []);
-
-  const fetchDashboardData = async () => {
-    try {
-      // Fetch timeline data
-      const timelineResponse = await fetch('http://localhost:5000/api/analytics/users_sessions_line');
-      const timelineData = await timelineResponse.json();
-      
-      const labels = timelineData.map(item => item.date);
-      const userCounts = timelineData.map(item => item.user_count);
-      const sessionCounts = timelineData.map(item => item.session_count);
-      
-      setTimelineData({
-        labels: labels,
-        datasets: [
-          {
-            label: 'Users',
-            data: userCounts,
-            fill: true,
-            borderColor: 'rgba(66, 99, 235, 1)',
-            backgroundColor: 'rgba(66, 99, 235, 0.1)',
-            tension: 0.4,
-            pointRadius: 3,
-            pointBackgroundColor: 'rgba(66, 99, 235, 1)',
-            pointBorderColor: '#fff',
-            pointBorderWidth: 2
-          },
-          {
-            label: 'Sessions',
-            data: sessionCounts,
-            fill: true,
-            borderColor: 'rgb(66, 235, 156)',
-            backgroundColor: 'rgba(86, 235, 66, 0.1)',
-            tension: 0.4,
-            pointRadius: 3,
-            pointBackgroundColor: 'rgb(66, 235, 156)',
-            pointBorderColor: '#fff',
-            pointBorderWidth: 2
-          }
-        ]
-      });
-
-      // Fetch top pages data
-      const topPagesResponse = await fetch('http://localhost:5000/api/analytics/top_screens');
-      const topPagesData = await topPagesResponse.json();
-      setTopPages(topPagesData);
-
-      // Fetch event distribution data
-      const eventDistResponse = await fetch('http://localhost:5000/api/analytics/event_donut');
-      const eventDistData = await eventDistResponse.json();
-      setEventData(eventDistData);
-
-      // Fetch user interactions data
-      const interactionsResponse = await fetch('http://localhost:5000/api/analytics/user_interactions');
-      const interactionsData = await interactionsResponse.json();
-      interactionsData.labels = interactionsData.map(item => item.screen_name);
-      interactionsData.touch_counts = interactionsData.map(item => item.touch_count);
-      interactionsData.scroll_counts = interactionsData.map(item => item.scroll_count);
-      setUserInteractions({
-        labels: interactionsData.labels,
-        datasets: [
-          {
-            label: 'Touch',
-            data: interactionsData.touch_counts,
-            backgroundColor: '#36A2EB'
-          },
-          {
-            label: 'Scroll',
-            data: interactionsData.scroll_counts,
-            backgroundColor: '#FF6384'
-          }
-        ]
-      });
-
-      // Fetch screen visited data
-      const screenVisitedResponse = await fetch('http://localhost:5000/api/analytics/screen_visited');
-      const screenVisitedData = await screenVisitedResponse.json();
-      screenVisitedData.labels = screenVisitedData.map(item => item.screen_name);
-      screenVisitedData.counts = screenVisitedData.map(item => item.event_count);
-      
-      setScreenVisited({
-        labels: screenVisitedData.labels,
-        datasets: [{
-          label: 'Events',
-          data: screenVisitedData.counts,
-          backgroundColor: '#36A2EB'
-        }]
-      });
-
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-    }
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
   };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('userData');
     navigate('/login');
+  };
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'dashboard':
+        return (
+          <>
+            {/* Metrics cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="bg-white rounded-lg shadow p-6">
+                <h3 className="text-xl font-semibold mb-2">Total Users</h3>
+                <p className="text-3xl font-bold">1,234</p>
+                <p className="text-green-500 text-sm mt-2">↑ 12.5% vs last period</p>
+              </div>
+              <div className="bg-white rounded-lg shadow p-6">
+                <h3 className="text-xl font-semibold mb-2">Active Users</h3>
+                <p className="text-3xl font-bold">892</p>
+                <p className="text-green-500 text-sm mt-2">↑ 8.2% vs last period</p>
+              </div>
+              <div className="bg-white rounded-lg shadow p-6">
+                <h3 className="text-xl font-semibold mb-2">Total Revenue</h3>
+                <p className="text-3xl font-bold">$12,345</p>
+                <p className="text-red-500 text-sm mt-2">↓ 3.1% vs last period</p>
+              </div>
+              <div className="bg-white rounded-lg shadow p-6">
+                <h3 className="text-xl font-semibold mb-2">Conversion Rate</h3>
+                <p className="text-3xl font-bold">2.4%</p>
+                <p className="text-green-500 text-sm mt-2">↑ 15.4% vs last period</p>
+              </div>
+            </div>
+
+            {/* Timeline Chart */}
+            <div className="mt-6">
+              <TimelineChart data={timelineData} />
+            </div>
+
+            {/* First row of charts */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <TopPagesChart data={topPages} />
+              <EventDistributionChart 
+                data={eventData}
+                brightColors={brightColors}
+                dullColors={dullColors}
+              />
+            </div>
+
+            {/* Second row of charts */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <UserInteractionsChart data={userInteractions} />
+              <ScreenVisitedChart data={screenVisited} />
+            </div>
+          </>
+        );
+      case 'events':
+        return <Events />;
+      case 'users':
+        return <Users />;
+      case 'reports':
+        return <Reports />;
+      case 'settings':
+        return <Settings />;
+      default:
+        return null;
+    }
   };
 
   return (
@@ -229,30 +103,33 @@ export default function Dashboard() {
         </div>
         <nav className="mt-6">
           <div className="px-4 space-y-2">
-            <button className="w-full flex items-center space-x-2 py-2 px-4 rounded-lg bg-blue-600">
+            <button 
+              onClick={() => handleTabChange('dashboard')}
+              className={`w-full flex items-center space-x-2 py-2 px-4 rounded-lg ${activeTab === 'dashboard' ? 'bg-blue-600' : 'hover:bg-gray-800'}`}
+            >
               <span>Dashboard</span>
             </button>
             <button 
-              onClick={handleEventsClick}
-              className="w-full flex items-center space-x-2 py-2 px-4 rounded-lg hover:bg-gray-800"
+              onClick={() => handleTabChange('events')}
+              className={`w-full flex items-center space-x-2 py-2 px-4 rounded-lg ${activeTab === 'events' ? 'bg-blue-600' : 'hover:bg-gray-800'}`}
             >
               <span>Events</span>
             </button>
             <button 
-              onClick={handleUsersClick}
-              className="w-full flex items-center space-x-2 py-2 px-4 rounded-lg hover:bg-gray-800"
+              onClick={() => handleTabChange('users')}
+              className={`w-full flex items-center space-x-2 py-2 px-4 rounded-lg ${activeTab === 'users' ? 'bg-blue-600' : 'hover:bg-gray-800'}`}
             >
               <span>Users</span>
             </button>
             <button 
-              onClick={handleReportsClick}
-              className="w-full flex items-center space-x-2 py-2 px-4 rounded-lg hover:bg-gray-800"
+              onClick={() => handleTabChange('reports')}
+              className={`w-full flex items-center space-x-2 py-2 px-4 rounded-lg ${activeTab === 'reports' ? 'bg-blue-600' : 'hover:bg-gray-800'}`}
             >
               <span>Reports</span>
             </button>
             <button 
-              onClick={handleSettingsClick}
-              className="w-full flex items-center space-x-2 py-2 px-4 rounded-lg hover:bg-gray-800"
+              onClick={() => handleTabChange('settings')}
+              className={`w-full flex items-center space-x-2 py-2 px-4 rounded-lg ${activeTab === 'settings' ? 'bg-blue-600' : 'hover:bg-gray-800'}`}
             >
               <span>Settings</span>
             </button>
@@ -285,50 +162,7 @@ export default function Dashboard() {
         </header>
 
         <main className="p-6">
-          {/* Metrics cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-xl font-semibold mb-2">Total Users</h3>
-              <p className="text-3xl font-bold">1,234</p>
-              <p className="text-green-500 text-sm mt-2">↑ 12.5% vs last period</p>
-            </div>
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-xl font-semibold mb-2">Active Users</h3>
-              <p className="text-3xl font-bold">892</p>
-              <p className="text-green-500 text-sm mt-2">↑ 8.2% vs last period</p>
-            </div>
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-xl font-semibold mb-2">Total Revenue</h3>
-              <p className="text-3xl font-bold">$12,345</p>
-              <p className="text-red-500 text-sm mt-2">↓ 3.1% vs last period</p>
-            </div>
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-xl font-semibold mb-2">Conversion Rate</h3>
-              <p className="text-3xl font-bold">2.4%</p>
-              <p className="text-green-500 text-sm mt-2">↑ 15.4% vs last period</p>
-            </div>
-          </div>
-
-          {/* Timeline Chart */}
-          <div className="mt-6">
-            <TimelineChart data={timelineData} />
-          </div>
-
-          {/* First row of charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-            <TopPagesChart data={topPages} />
-            <EventDistributionChart 
-              data={eventData}
-              brightColors={brightColors}
-              dullColors={dullColors}
-            />
-          </div>
-
-          {/* Second row of charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-            <UserInteractionsChart data={userInteractions} />
-            <ScreenVisitedChart data={screenVisited} />
-          </div>
+          {renderContent()}
         </main>
       </div>
     </div>
