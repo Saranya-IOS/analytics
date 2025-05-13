@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Line, Doughnut, Bar } from 'react-chartjs-2';
 import {
@@ -37,6 +37,16 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('userData');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    } else {
+      navigate("/login")
+    }
+  }, []);
 
   // Mock data for charts
   const timelineData = {
@@ -85,6 +95,8 @@ export default function Dashboard() {
   };
 
   const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('userData');
     navigate('/login');
   };
 
@@ -241,7 +253,7 @@ export default function Dashboard() {
               </svg>
             </button>
             <div className="flex items-center space-x-4">
-              <span className="text-gray-700">John Doe</span>
+              <span className="text-gray-700">{user && (user.first_name + " " + user.last_name)}</span>
             </div>
           </div>
         </header>

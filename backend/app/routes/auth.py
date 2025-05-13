@@ -41,4 +41,9 @@ def login():
     access_token = create_access_token(
         identity=user["admin_user_id"], expires_delta=timedelta(hours=1)
     )
-    return jsonify({"access_token": access_token}), 200
+    return jsonify({
+        "access_token": access_token,
+        "admin_user_id": user["admin_user_id"],
+        "first_name": user["first_name"],
+        "last_name": user["last_name"],
+    }), 200

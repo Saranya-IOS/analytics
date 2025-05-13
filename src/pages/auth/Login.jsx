@@ -29,7 +29,13 @@ export default function Login() {
       }
   
       // Save JWT token to localStorage (or cookies, if you prefer)
+      var userData = {
+        admin_user_id: data.admin_user_id,
+        first_name: data.first_name,
+        last_name: data.last_name,
+      }
       localStorage.setItem('token', data.access_token);
+      localStorage.setItem("userData", JSON.stringify(userData))
   
       // Redirect to dashboard
       navigate('/dashboard');
