@@ -33,6 +33,37 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [user, setUser] = useState(null);
+  const [timelineData, setTimelineData] = useState({
+    labels: [],
+    datasets: [
+      {
+        label: 'Users',
+        data: [],
+        fill: true,
+        borderColor: 'rgba(66, 99, 235, 1)',
+        backgroundColor: 'rgba(66, 99, 235, 0.1)',
+        tension: 0.4,
+        pointRadius: 3,
+        pointBackgroundColor: 'rgba(66, 99, 235, 1)',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2
+      },
+      {
+        label: 'Sessions',
+        data: [],
+        fill: true,
+        borderColor: 'rgb(66, 235, 156)',
+        backgroundColor: 'rgba(86, 235, 66, 0.1)',
+        tension: 0.4,
+        pointRadius: 3,
+        pointBackgroundColor: 'rgb(66, 235, 156)',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2
+      }
+    ]
+  });
+
+  // New graph data states
   const [topPages, setTopPages] = useState([
     { screen: 'Home', events: 134, users: 38 },
     { screen: 'Profile', events: 82, users: 22 },
@@ -90,7 +121,51 @@ export default function Dashboard() {
     } else {
       navigate("/login");
     }
+    fetchTimelineData();
   }, []);
+
+  const fetchTimelineData = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/analytics/users_sessions_line');
+      const data = await response.json();
+      
+      const labels = data.map(item => item.date);
+      const userCounts = data.map(item => item.user_count);
+      const sessionCounts = data.map(item => item.session_count);
+      
+      setTimelineData({
+        labels: labels,
+        datasets: [
+          {
+            label: 'Users',
+            data: userCounts,
+            fill: true,
+            borderColor: 'rgba(66, 99, 235, 1)',
+            backgroundColor: 'rgba(66, 99, 235, 0.1)',
+            tension: 0.4,
+            pointRadius: 3,
+            pointBackgroundColor: 'rgba(66, 99, 235, 1)',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2
+          },
+          {
+            label: 'Sessions',
+            data: sessionCounts,
+            fill: true,
+            borderColor: 'rgb(66, 235, 156)',
+            backgroundColor: 'rgba(86, 235, 66, 0.1)',
+            tension: 0.4,
+            pointRadius: 3,
+            pointBackgroundColor: 'rgb(66, 235, 156)',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2
+          }
+        ]
+      });
+    } catch (error) {
+      console.error('Error fetching timeline data:', error);
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -153,6 +228,7 @@ export default function Dashboard() {
         </header>
 
         <main className="p-6">
+          {/* Existing metrics cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="bg-white rounded-lg shadow p-6">
               <h3 className="text-xl font-semibold mb-2">Total Users</h3>
@@ -176,6 +252,44 @@ export default function Dashboard() {
             </div>
           </div>
 
+          {/* Existing timeline chart */}
+          <div className="mt-6">
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-xl font-bold mb-4">Users Sessions Timeline</h2>
+              <div className="h-80">
+                <Line 
+                  data={timelineData}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: {
+                        position: 'top',
+                      },
+                      filler: {
+                        propagate: true
+                      }
+                    },
+                    scales: {
+                      x: {
+                        grid: {
+                          display: false
+                        }
+                      },
+                      y: {
+                        beginAtZero: true,
+                        grid: {
+                          color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                      }
+                    }
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* New graphs - First row */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
             {/* Top Pages by Screen */}
             <div className="bg-white rounded-lg shadow p-6">
@@ -222,6 +336,7 @@ export default function Dashboard() {
             </div>
           </div>
 
+          {/* New graphs - Second row */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
             {/* User Interactions */}
             <div className="bg-white rounded-lg shadow p-6">
