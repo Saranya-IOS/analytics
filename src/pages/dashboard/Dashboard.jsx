@@ -92,6 +92,23 @@ export default function Dashboard() {
 
   const { brightColors, dullColors } = generateColorPairs(eventData.event_distribution.length);
 
+  // Navigation functions
+  const handleEventsClick = () => {
+    navigate('/events');
+  };
+
+  const handleUsersClick = () => {
+    navigate('/users');
+  };
+
+  const handleReportsClick = () => {
+    navigate('/reports');
+  };
+
+  const handleSettingsClick = () => {
+    navigate('/settings');
+  };
+
   useEffect(() => {
     const storedUser = localStorage.getItem('userData');
     if (storedUser) {
@@ -215,16 +232,28 @@ export default function Dashboard() {
             <button className="w-full flex items-center space-x-2 py-2 px-4 rounded-lg bg-blue-600">
               <span>Dashboard</span>
             </button>
-            <button className="w-full flex items-center space-x-2 py-2 px-4 rounded-lg hover:bg-gray-800">
+            <button 
+              onClick={handleEventsClick}
+              className="w-full flex items-center space-x-2 py-2 px-4 rounded-lg hover:bg-gray-800"
+            >
               <span>Events</span>
             </button>
-            <button className="w-full flex items-center space-x-2 py-2 px-4 rounded-lg hover:bg-gray-800">
+            <button 
+              onClick={handleUsersClick}
+              className="w-full flex items-center space-x-2 py-2 px-4 rounded-lg hover:bg-gray-800"
+            >
               <span>Users</span>
             </button>
-            <button className="w-full flex items-center space-x-2 py-2 px-4 rounded-lg hover:bg-gray-800">
+            <button 
+              onClick={handleReportsClick}
+              className="w-full flex items-center space-x-2 py-2 px-4 rounded-lg hover:bg-gray-800"
+            >
               <span>Reports</span>
             </button>
-            <button className="w-full flex items-center space-x-2 py-2 px-4 rounded-lg hover:bg-gray-800">
+            <button 
+              onClick={handleSettingsClick}
+              className="w-full flex items-center space-x-2 py-2 px-4 rounded-lg hover:bg-gray-800"
+            >
               <span>Settings</span>
             </button>
             <button 
