@@ -13,8 +13,6 @@ import {
   ArcElement,
   BarElement,
   Filler
-  BarElement,
-  Filler
 } from 'chart.js';
 
 // Import components
