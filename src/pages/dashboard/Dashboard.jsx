@@ -11,7 +11,8 @@ import {
   Tooltip,
   Legend,
   ArcElement,
-  BarElement
+  BarElement,
+  Filler
 } from 'chart.js';
 
 // Import components
@@ -30,7 +31,8 @@ ChartJS.register(
   Tooltip,
   Legend,
   ArcElement,
-  BarElement
+  BarElement,
+  Filler
 );
 
 export default function Dashboard() {
@@ -48,6 +50,10 @@ export default function Dashboard() {
         borderColor: 'rgba(66, 99, 235, 1)',
         backgroundColor: 'rgba(66, 99, 235, 0.1)',
         tension: 0.4,
+        pointRadius: 3,
+        pointBackgroundColor: 'rgba(66, 99, 235, 1)',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2
       },
       {
         label: 'Interactions',
@@ -56,6 +62,10 @@ export default function Dashboard() {
         borderColor: 'rgb(66, 235, 156)',
         backgroundColor: 'rgba(86, 235, 66, 0.1)',
         tension: 0.4,
+        pointRadius: 3,
+        pointBackgroundColor: 'rgb(66, 235, 156)',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2
       }
     ]
   });
@@ -85,6 +95,10 @@ export default function Dashboard() {
             borderColor: 'rgba(66, 99, 235, 1)',
             backgroundColor: 'rgba(66, 99, 235, 0.1)',
             tension: 0.4,
+            pointRadius: 3,
+            pointBackgroundColor: 'rgba(66, 99, 235, 1)',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2
           },
           {
             label: 'Interactions',
@@ -93,6 +107,10 @@ export default function Dashboard() {
             borderColor: 'rgb(66, 235, 156)',
             backgroundColor: 'rgba(86, 235, 66, 0.1)',
             tension: 0.4,
+            pointRadius: 3,
+            pointBackgroundColor: 'rgb(66, 235, 156)',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2
           }
         ]
       });
@@ -170,6 +188,22 @@ export default function Dashboard() {
                       plugins: {
                         legend: {
                           position: 'top',
+                        },
+                        filler: {
+                          propagate: true
+                        }
+                      },
+                      scales: {
+                        x: {
+                          grid: {
+                            display: false
+                          }
+                        },
+                        y: {
+                          beginAtZero: true,
+                          grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                          }
                         }
                       }
                     }}
