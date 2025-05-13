@@ -40,19 +40,36 @@ export default function Dashboard() {
     ]
   });
 
-  const eventData = {
-    total_events: 127,
-    event_distribution: [
-      { event_name: "App Opened", count: 47, percentage: 7.1 },
-      { event_name: "Button Clicked", count: 32, percentage: 10.2 },
-      { event_name: "Incident created", count: 25, percentage: 30.68 },
-      { event_name: "Log In", count: 23, percentage: 25.11 },
-      { event_name: "App Closed", count: 47, percentage: 18.92 },
-      { event_name: "LogOut", count: 32, percentage: 5.2 },
-      { event_name: "Home Screen", count: 25, percentage: 2.68 },
-      { event_name: "Raised Request", count: 23, percentage: 0.11 }
+  const [eventData, setEventData] = useState({
+    total_events: 0,
+    event_distribution: []
+  });
+
+  const [topPages, setTopPages] = useState([]);
+  const [userInteractions, setUserInteractions] = useState({
+    labels: [],
+    datasets: [
+      {
+        label: 'Touch',
+        data: [],
+        backgroundColor: '#36A2EB'
+      },
+      {
+        label: 'Scroll',
+        data: [],
+        backgroundColor: '#FF6384'
+      }
     ]
-  };
+  });
+
+  const [screenVisited, setScreenVisited] = useState({
+    labels: [],
+    datasets: [{
+      label: 'Events',
+      data: [],
+      backgroundColor: '#36A2EB'
+    }]
+  });
 
   const generateColorPairs = (count) => {
     const predefinedBrightColors = [
@@ -75,39 +92,6 @@ export default function Dashboard() {
 
   const { brightColors, dullColors } = generateColorPairs(eventData.event_distribution.length);
 
-  const [topPages, setTopPages] = useState([
-    { screen: 'Home', events: 134, users: 38 },
-    { screen: 'Profile', events: 82, users: 22 },
-    { screen: 'Settings', events: 45, users: 15 },
-    { screen: 'Login', events: 67, users: 18 },
-    { screen: 'Make Request', events: 87, users: 10 }
-  ]);
-
-  const [userInteractions, setUserInteractions] = useState({
-    labels: ['Home', 'Profile', 'Settings', 'Dashboard'],
-    datasets: [
-      {
-        label: 'Touch',
-        data: [500, 300, 200, 400],
-        backgroundColor: '#36A2EB'
-      },
-      {
-        label: 'Scroll',
-        data: [300, 200, 100, 100],
-        backgroundColor: '#FF6384'
-      }
-    ]
-  });
-
-  const [screenVisited, setScreenVisited] = useState({
-    labels: ['Home', 'Profile', 'Settings', 'Search', 'Login'],
-    datasets: [{
-      label: 'Events',
-      data: [150, 120, 90, 70, 40],
-      backgroundColor: '#36A2EB'
-    }]
-  });
-
   useEffect(() => {
     const storedUser = localStorage.getItem('userData');
     if (storedUser) {
@@ -115,17 +99,19 @@ export default function Dashboard() {
     } else {
       navigate("/login");
     }
-    fetchTimelineData();
+    
+    fetchDashboardData();
   }, []);
 
-  const fetchTimelineData = async () => {
+  const fetchDashboardData = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/analytics/users_sessions_line');
-      const data = await response.json();
+      // Fetch timeline data
+      const timelineResponse = await fetch('http://localhost:5000/api/analytics/users_sessions_line');
+      const timelineData = await timelineResponse.json();
       
-      const labels = data.map(item => item.date);
-      const userCounts = data.map(item => item.user_count);
-      const sessionCounts = data.map(item => item.session_count);
+      const labels = timelineData.map(item => item.date);
+      const userCounts = timelineData.map(item => item.user_count);
+      const sessionCounts = timelineData.map(item => item.session_count);
       
       setTimelineData({
         labels: labels,
@@ -156,8 +142,50 @@ export default function Dashboard() {
           }
         ]
       });
+
+      // Fetch top pages data
+      const topPagesResponse = await fetch('http://localhost:5000/api/analytics/top_pages');
+      const topPagesData = await topPagesResponse.json();
+      setTopPages(topPagesData);
+
+      // Fetch event distribution data
+      const eventDistResponse = await fetch('http://localhost:5000/api/analytics/event_distribution');
+      const eventDistData = await eventDistResponse.json();
+      setEventData(eventDistData);
+
+      // Fetch user interactions data
+      const interactionsResponse = await fetch('http://localhost:5000/api/analytics/user_interactions');
+      const interactionsData = await interactionsResponse.json();
+      setUserInteractions({
+        labels: interactionsData.labels,
+        datasets: [
+          {
+            label: 'Touch',
+            data: interactionsData.touch_counts,
+            backgroundColor: '#36A2EB'
+          },
+          {
+            label: 'Scroll',
+            data: interactionsData.scroll_counts,
+            backgroundColor: '#FF6384'
+          }
+        ]
+      });
+
+      // Fetch screen visited data
+      const screenVisitedResponse = await fetch('http://localhost:5000/api/analytics/screen_visited');
+      const screenVisitedData = await screenVisitedResponse.json();
+      setScreenVisited({
+        labels: screenVisitedData.labels,
+        datasets: [{
+          label: 'Events',
+          data: screenVisitedData.counts,
+          backgroundColor: '#36A2EB'
+        }]
+      });
+
     } catch (error) {
-      console.error('Error fetching timeline data:', error);
+      console.error('Error fetching dashboard data:', error);
     }
   };
 
