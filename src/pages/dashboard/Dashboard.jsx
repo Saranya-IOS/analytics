@@ -1,39 +1,15 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Line, Doughnut, Bar } from 'react-chartjs-2';
-import Chart from 'chart.js/auto';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement,
-  BarElement,
-  Filler
-} from 'chart.js';
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement,
-  BarElement,
-  Filler
-);
+import TimelineChart from '../../components/graphs/TimelineChart';
+import TopPagesChart from '../../components/graphs/TopPagesChart';
+import EventDistributionChart from '../../components/graphs/EventDistributionChart';
+import UserInteractionsChart from '../../components/graphs/UserInteractionsChart';
+import ScreenVisitedChart from '../../components/graphs/ScreenVisitedChart';
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [user, setUser] = useState(null);
-  const chartRef = useRef(null);
   const [timelineData, setTimelineData] = useState({
     labels: [],
     datasets: [
@@ -142,96 +118,6 @@ export default function Dashboard() {
     fetchTimelineData();
   }, []);
 
-  useEffect(() => {
-    const canvas = document.getElementById('events-distribution-chart');
-    const tooltipBox = document.getElementById('tooltipBox');
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    const labels = eventData.event_distribution.map(e => e.event_name);
-    const counts = eventData.event_distribution.map(e => e.count);
-
-    const chart = new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels,
-        datasets: [{
-          data: counts,
-          backgroundColor: dullColors,
-          borderColor: '#ffffff',
-          borderWidth: 2,
-          hoverOffset: 60,
-          hoverBorderWidth: 4,
-          hoverBorderColor: '#fff'
-        }]
-      },
-      options: {
-        cutout: '65%',
-        layout: {
-          padding: {
-            left: 40,
-            right: 40,
-            top: 30,
-            bottom: 30
-          }
-        },
-        responsive: true,
-        animation: { duration: 600, easing: 'easeOutExpo' },
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            enabled: false,
-            external: function(context) {
-              const tooltipModel = context.tooltip;
-
-              if (tooltipModel.opacity === 0) {
-                tooltipBox.style.display = 'none';
-                return;
-              }
-
-              const index = tooltipModel.dataPoints[0].dataIndex;
-              const event = eventData.event_distribution[index];
-              const chartCanvas = context.chart.canvas;
-              const arc = context.tooltip.dataPoints[0].element;
-
-              const angle = (arc.startAngle + arc.endAngle) / 2;
-              const radius = (arc.outerRadius + arc.innerRadius) / 2;
-
-              const chartCenterX = chartCanvas.offsetLeft + chartCanvas.width / 2;
-              const chartCenterY = chartCanvas.offsetTop + chartCanvas.height / 2;
-
-              const tooltipX = chartCenterX + Math.cos(angle) * radius;
-              const tooltipY = chartCenterY + Math.sin(angle) * radius;
-
-              tooltipBox.innerHTML = `
-                <div class="title">${event.event_name}</div>
-                <div class="metrics">${event.count} events</div>
-                <div class="details">${event.percentage.toFixed(1)}% of total</div>
-              `;
-
-              tooltipBox.style.display = 'block';
-              tooltipBox.style.left = tooltipX - (tooltipBox.offsetWidth / 2) - 100 + 'px';
-              tooltipBox.style.top = tooltipY - (tooltipBox.offsetHeight / 2) - 50 + 'px';
-            }
-          }
-        },
-        hover: {
-          onHover: (event, chartElements) => {
-            const dataset = chart.data.datasets[0];
-            dataset.backgroundColor = dataset.backgroundColor.map((color, i) =>
-              chartElements[0]?.index === i ? brightColors[i] : dullColors[i]
-            );
-            chart.update('none');
-          }
-        }
-      }
-    });
-
-    return () => {
-      chart.destroy();
-    };
-  }, [eventData, brightColors, dullColors]);
-
   const fetchTimelineData = async () => {
     try {
       const response = await fetch('http://localhost:5000/api/analytics/users_sessions_line');
@@ -336,7 +222,7 @@ export default function Dashboard() {
         </header>
 
         <main className="p-6">
-          {/* Existing metrics cards */}
+          {/* Metrics cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="bg-white rounded-lg shadow p-6">
               <h3 className="text-xl font-semibold mb-2">Total Users</h3>
@@ -360,138 +246,25 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Existing timeline chart */}
+          {/* Timeline Chart */}
           <div className="mt-6">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-bold mb-4">Users Sessions Timeline</h2>
-              <div className="h-80">
-                <Line 
-                  data={timelineData}
-                  options={{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                      legend: {
-                        position: 'top',
-                      },
-                      filler: {
-                        propagate: true
-                      }
-                    },
-                    scales: {
-                      x: {
-                        grid: {
-                          display: false
-                        }
-                      },
-                      y: {
-                        beginAtZero: true,
-                        grid: {
-                          color: 'rgba(0, 0, 0, 0.05)'
-                        }
-                      }
-                    }
-                  }}
-                />
-              </div>
-            </div>
+            <TimelineChart data={timelineData} />
           </div>
 
-          {/* New graphs - First row */}
+          {/* First row of charts */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-            {/* Top Pages by Screen */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-bold mb-4">Top Pages by Screen</h2>
-              <div className="space-y-4">
-                {topPages.map((page, index) => (
-                  <div key={index} className="flex justify-between items-center">
-                    <div className="flex items-center">
-                      <span className="w-6 h-6 bg-blue-100 text-blue-800 rounded-full flex items-center justify-center text-sm font-semibold">
-                        {index + 1}
-                      </span>
-                      <span className="ml-3">{page.screen}</span>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-semibold">{page.events} events</div>
-                      <div className="text-sm text-gray-500">{page.users} users</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Event Counts */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-bold mb-4">Event Counts</h2>
-              <div className="relative h-80">
-                <canvas id="events-distribution-chart"></canvas>
-                <div id="tooltipBox" className="absolute hidden bg-white p-3 rounded-lg shadow-lg border border-gray-200">
-                  <div className="title font-semibold"></div>
-                  <div className="metrics text-sm text-gray-600"></div>
-                  <div className="details text-sm text-gray-500"></div>
-                </div>
-                <div id="customLegend" className="absolute right-0 top-1/2 transform -translate-y-1/2 space-y-2">
-                  {eventData.event_distribution.map((event, index) => (
-                    <div key={index} className="flex items-center space-x-2">
-                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: brightColors[index] }}></div>
-                      <span className="text-sm">{event.event_name}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+            <TopPagesChart data={topPages} />
+            <EventDistributionChart 
+              data={eventData}
+              brightColors={brightColors}
+              dullColors={dullColors}
+            />
           </div>
 
-          {/* New graphs - Second row */}
+          {/* Second row of charts */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-            {/* User Interactions */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-bold mb-4">User Interactions (Touch / Scroll)</h2>
-              <div className="h-80">
-                <Bar 
-                  data={userInteractions}
-                  options={{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                      legend: {
-                        position: 'top'
-                      }
-                    },
-                    scales: {
-                      y: {
-                        beginAtZero: true
-                      }
-                    }
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Screen Visited */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-bold mb-4">Screen Visited</h2>
-              <div className="h-80">
-                <Bar 
-                  data={screenVisited}
-                  options={{
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                      legend: {
-                        display: false
-                      }
-                    },
-                    scales: {
-                      x: {
-                        beginAtZero: true
-                      }
-                    }
-                  }}
-                />
-              </div>
-            </div>
+            <UserInteractionsChart data={userInteractions} />
+            <ScreenVisitedChart data={screenVisited} />
           </div>
         </main>
       </div>
