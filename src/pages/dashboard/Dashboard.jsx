@@ -15,12 +15,6 @@ import {
   Filler
 } from 'chart.js';
 
-// Import components
-import Events from './Events';
-import Reports from './Reports';
-import Settings from './Settings';
-import Users from './Users';
-
 // Register ChartJS components
 ChartJS.register(
   CategoryScale,
@@ -38,36 +32,55 @@ ChartJS.register(
 export default function Dashboard() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeTab, setActiveTab] = useState('dashboard');
   const [user, setUser] = useState(null);
-  const [timelineData, setTimelineData] = useState({
-    labels: [],
+  const [topPages, setTopPages] = useState([
+    { screen: 'Home', events: 134, users: 38 },
+    { screen: 'Profile', events: 82, users: 22 },
+    { screen: 'Settings', events: 45, users: 15 },
+    { screen: 'Login', events: 67, users: 18 },
+    { screen: 'Make Request', events: 87, users: 10 }
+  ]);
+
+  const [eventCounts, setEventCounts] = useState({
+    labels: ['App Opened', 'Button Clicked', 'Incident Created', 'Log In', 'App Closed', 'LogOut', 'Home Screen', 'Raised Request'],
+    datasets: [{
+      data: [30, 25, 15, 20, 25, 20, 25, 20],
+      backgroundColor: [
+        '#FF6384',
+        '#36A2EB',
+        '#FF9F40',
+        '#4BC0C0',
+        '#FFCD56',
+        '#9966FF',
+        '#FF6384',
+        '#36A2EB'
+      ]
+    }]
+  });
+
+  const [userInteractions, setUserInteractions] = useState({
+    labels: ['Home', 'Profile', 'Settings', 'Dashboard'],
     datasets: [
       {
-        label: 'Users',
-        data: [],
-        fill: true,
-        borderColor: 'rgba(66, 99, 235, 1)',
-        backgroundColor: 'rgba(66, 99, 235, 0.1)',
-        tension: 0.4,
-        pointRadius: 3,
-        pointBackgroundColor: 'rgba(66, 99, 235, 1)',
-        pointBorderColor: '#fff',
-        pointBorderWidth: 2
+        label: 'Touch',
+        data: [500, 300, 200, 400],
+        backgroundColor: '#36A2EB'
       },
       {
-        label: 'Sessions',
-        data: [],
-        fill: true,
-        borderColor: 'rgb(66, 235, 156)',
-        backgroundColor: 'rgba(86, 235, 66, 0.1)',
-        tension: 0.4,
-        pointRadius: 3,
-        pointBackgroundColor: 'rgb(66, 235, 156)',
-        pointBorderColor: '#fff',
-        pointBorderWidth: 2
+        label: 'Scroll',
+        data: [300, 200, 100, 100],
+        backgroundColor: '#FF6384'
       }
     ]
+  });
+
+  const [screenVisited, setScreenVisited] = useState({
+    labels: ['Home', 'Profile', 'Settings', 'Search', 'Login'],
+    datasets: [{
+      label: 'Events',
+      data: [150, 120, 90, 70, 40],
+      backgroundColor: '#36A2EB'
+    }]
   });
 
   useEffect(() => {
@@ -75,187 +88,14 @@ export default function Dashboard() {
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     } else {
-      navigate("/login")
+      navigate("/login");
     }
-    fetchTimelineData();
   }, []);
-
-  const fetchTimelineData = async () => {
-    try {
-      const response = await fetch('http://localhost:5000/api/analytics/users_sessions_line');
-      const data = await response.json();
-      
-      const labels = data.map(item => item.date);
-      const userCounts = data.map(item => item.user_count);
-      const sessionCounts = data.map(item => item.session_count);
-      
-      setTimelineData({
-        labels: labels,
-        datasets: [
-          {
-            label: 'Users',
-            data: userCounts,
-            fill: true,
-            borderColor: 'rgba(66, 99, 235, 1)',
-            backgroundColor: 'rgba(66, 99, 235, 0.1)',
-            tension: 0.4,
-            pointRadius: 3,
-            pointBackgroundColor: 'rgba(66, 99, 235, 1)',
-            pointBorderColor: '#fff',
-            pointBorderWidth: 2
-          },
-          {
-            label: 'Sessions',
-            data: sessionCounts,
-            fill: true,
-            borderColor: 'rgb(66, 235, 156)',
-            backgroundColor: 'rgba(86, 235, 66, 0.1)',
-            tension: 0.4,
-            pointRadius: 3,
-            pointBackgroundColor: 'rgb(66, 235, 156)',
-            pointBorderColor: '#fff',
-            pointBorderWidth: 2
-          }
-        ]
-      });
-    } catch (error) {
-      console.error('Error fetching timeline data:', error);
-    }
-  };
-
-  const eventTypesData = {
-    labels: ['Page Views', 'Clicks', 'Signups', 'Purchases'],
-    datasets: [{
-      data: [300, 200, 150, 100],
-      backgroundColor: [
-        'rgba(66, 99, 235, 0.8)',
-        'rgba(126, 87, 194, 0.8)',
-        'rgba(0, 191, 165, 0.8)',
-        'rgba(76, 175, 80, 0.8)',
-      ],
-    }]
-  };
-
-  const sectionViewsData = {
-    labels: ['Home', 'Products', 'About', 'Contact', 'Blog'],
-    datasets: [{
-      label: 'Page Views',
-      data: [1200, 900, 600, 400, 800],
-      backgroundColor: 'rgba(66, 99, 235, 0.8)',
-      borderRadius: 4,
-    }]
-  };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('userData');
     navigate('/login');
-  };
-
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'dashboard':
-        return (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-xl font-semibold mb-2">Total Users</h3>
-                <p className="text-3xl font-bold">1,234</p>
-                <p className="text-green-500 text-sm mt-2">↑ 12.5% vs last period</p>
-              </div>
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-xl font-semibold mb-2">Active Users</h3>
-                <p className="text-3xl font-bold">892</p>
-                <p className="text-green-500 text-sm mt-2">↑ 8.2% vs last period</p>
-              </div>
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-xl font-semibold mb-2">Total Revenue</h3>
-                <p className="text-3xl font-bold">$12,345</p>
-                <p className="text-red-500 text-sm mt-2">↓ 3.1% vs last period</p>
-              </div>
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-xl font-semibold mb-2">Conversion Rate</h3>
-                <p className="text-3xl font-bold">2.4%</p>
-                <p className="text-green-500 text-sm mt-2">↑ 15.4% vs last period</p>
-              </div>
-            </div>
-
-            <div className="mt-8">
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-xl font-bold mb-4">Users Sessions Timeline</h2>
-                <div className="h-80">
-                  <Line 
-                    data={timelineData}
-                    options={{
-                      responsive: true,
-                      maintainAspectRatio: false,
-                      plugins: {
-                        legend: {
-                          position: 'top',
-                        },
-                        filler: {
-                          propagate: true
-                        }
-                      },
-                      scales: {
-                        x: {
-                          grid: {
-                            display: false
-                          }
-                        },
-                        y: {
-                          beginAtZero: true,
-                          grid: {
-                            color: 'rgba(0, 0, 0, 0.05)'
-                          }
-                        }
-                      }
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-xl font-bold mb-4">Event Types</h2>
-                <div className="h-80">
-                  <Doughnut 
-                    data={eventTypesData}
-                    options={{
-                      responsive: true,
-                      maintainAspectRatio: false,
-                    }}
-                  />
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-xl font-bold mb-4">Page Views by Section</h2>
-                <div className="h-80">
-                  <Bar 
-                    data={sectionViewsData}
-                    options={{
-                      responsive: true,
-                      maintainAspectRatio: false,
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-          </>
-        );
-      case 'events':
-        return <Events />;
-      case 'reports':
-        return <Reports />;
-      case 'settings':
-        return <Settings />;
-      case 'users':
-        return <Users />;
-      default:
-        return null;
-    }
   };
 
   return (
@@ -269,34 +109,19 @@ export default function Dashboard() {
         </div>
         <nav className="mt-6">
           <div className="px-4 space-y-2">
-            <button 
-              onClick={() => setActiveTab('dashboard')}
-              className={`w-full flex items-center space-x-2 py-2 px-4 rounded-lg ${activeTab === 'dashboard' ? 'bg-blue-600' : 'hover:bg-gray-800'}`}
-            >
+            <button className="w-full flex items-center space-x-2 py-2 px-4 rounded-lg bg-blue-600">
               <span>Dashboard</span>
             </button>
-            <button 
-              onClick={() => setActiveTab('events')}
-              className={`w-full flex items-center space-x-2 py-2 px-4 rounded-lg ${activeTab === 'events' ? 'bg-blue-600' : 'hover:bg-gray-800'}`}
-            >
+            <button className="w-full flex items-center space-x-2 py-2 px-4 rounded-lg hover:bg-gray-800">
               <span>Events</span>
             </button>
-            <button 
-              onClick={() => setActiveTab('users')}
-              className={`w-full flex items-center space-x-2 py-2 px-4 rounded-lg ${activeTab === 'users' ? 'bg-blue-600' : 'hover:bg-gray-800'}`}
-            >
+            <button className="w-full flex items-center space-x-2 py-2 px-4 rounded-lg hover:bg-gray-800">
               <span>Users</span>
             </button>
-            <button 
-              onClick={() => setActiveTab('reports')}
-              className={`w-full flex items-center space-x-2 py-2 px-4 rounded-lg ${activeTab === 'reports' ? 'bg-blue-600' : 'hover:bg-gray-800'}`}
-            >
+            <button className="w-full flex items-center space-x-2 py-2 px-4 rounded-lg hover:bg-gray-800">
               <span>Reports</span>
             </button>
-            <button 
-              onClick={() => setActiveTab('settings')}
-              className={`w-full flex items-center space-x-2 py-2 px-4 rounded-lg ${activeTab === 'settings' ? 'bg-blue-600' : 'hover:bg-gray-800'}`}
-            >
+            <button className="w-full flex items-center space-x-2 py-2 px-4 rounded-lg hover:bg-gray-800">
               <span>Settings</span>
             </button>
             <button 
@@ -328,7 +153,125 @@ export default function Dashboard() {
         </header>
 
         <main className="p-6">
-          {renderContent()}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-xl font-semibold mb-2">Total Users</h3>
+              <p className="text-3xl font-bold">1,234</p>
+              <p className="text-green-500 text-sm mt-2">↑ 12.5% vs last period</p>
+            </div>
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-xl font-semibold mb-2">Active Users</h3>
+              <p className="text-3xl font-bold">892</p>
+              <p className="text-green-500 text-sm mt-2">↑ 8.2% vs last period</p>
+            </div>
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-xl font-semibold mb-2">Total Revenue</h3>
+              <p className="text-3xl font-bold">$12,345</p>
+              <p className="text-red-500 text-sm mt-2">↓ 3.1% vs last period</p>
+            </div>
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-xl font-semibold mb-2">Conversion Rate</h3>
+              <p className="text-3xl font-bold">2.4%</p>
+              <p className="text-green-500 text-sm mt-2">↑ 15.4% vs last period</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            {/* Top Pages by Screen */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-xl font-bold mb-4">Top Pages by Screen</h2>
+              <div className="space-y-4">
+                {topPages.map((page, index) => (
+                  <div key={index} className="flex justify-between items-center">
+                    <div className="flex items-center">
+                      <span className="w-6 h-6 bg-blue-100 text-blue-800 rounded-full flex items-center justify-center text-sm font-semibold">
+                        {index + 1}
+                      </span>
+                      <span className="ml-3">{page.screen}</span>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-semibold">{page.events} events</div>
+                      <div className="text-sm text-gray-500">{page.users} users</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Event Counts */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-xl font-bold mb-4">Event Counts</h2>
+              <div className="h-80">
+                <Doughnut 
+                  data={eventCounts}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: {
+                        position: 'right',
+                        labels: {
+                          boxWidth: 12
+                        }
+                      }
+                    },
+                    cutout: '60%'
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            {/* User Interactions */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-xl font-bold mb-4">User Interactions (Touch / Scroll)</h2>
+              <div className="h-80">
+                <Bar 
+                  data={userInteractions}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: {
+                        position: 'top'
+                      }
+                    },
+                    scales: {
+                      y: {
+                        beginAtZero: true
+                      }
+                    }
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Screen Visited */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-xl font-bold mb-4">Screen Visited</h2>
+              <div className="h-80">
+                <Bar 
+                  data={screenVisited}
+                  options={{
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: {
+                        display: false
+                      }
+                    },
+                    scales: {
+                      x: {
+                        beginAtZero: true
+                      }
+                    }
+                  }}
+                />
+              </div>
+            </div>
+          </div>
         </main>
       </div>
     </div>
