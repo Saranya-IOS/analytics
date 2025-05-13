@@ -38,6 +38,27 @@ export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [user, setUser] = useState(null);
+  const [timelineData, setTimelineData] = useState({
+    labels: [],
+    datasets: [
+      {
+        label: 'Events',
+        data: [],
+        fill: true,
+        borderColor: 'rgba(66, 99, 235, 1)',
+        backgroundColor: 'rgba(66, 99, 235, 0.1)',
+        tension: 0.4,
+      },
+      {
+        label: 'Interactions',
+        data: [],
+        fill: true,
+        borderColor: 'rgb(66, 235, 156)',
+        backgroundColor: 'rgba(86, 235, 66, 0.1)',
+        tension: 0.4,
+      }
+    ]
+  });
 
   useEffect(() => {
     const storedUser = localStorage.getItem('userData');
@@ -46,29 +67,38 @@ export default function Dashboard() {
     } else {
       navigate("/login")
     }
+    fetchTimelineData();
   }, []);
 
-  // Mock data for charts
-  const timelineData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
-    datasets: [
-      {
-        label: 'Events',
-        data: [100, 200, 300, 400, 500, 200, 166],
-        fill: true,
-        borderColor: 'rgba(66, 99, 235, 1)',
-        backgroundColor: 'rgba(66, 99, 235, 0.1)',
-        tension: 0.4,
-      },
-      {
-        label: 'Interactions',
-        data: [150, 250, 350, 450, 550, 250, 216],
-        fill: true,
-        borderColor: 'rgb(66, 235, 156)',
-        backgroundColor: 'rgba(86, 235, 66, 0.1)',
-        tension: 0.4,
-      }
-    ]
+  const fetchTimelineData = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/analytics/timeline');
+      const data = await response.json();
+      
+      setTimelineData({
+        labels: data.labels,
+        datasets: [
+          {
+            label: 'Events',
+            data: data.events,
+            fill: true,
+            borderColor: 'rgba(66, 99, 235, 1)',
+            backgroundColor: 'rgba(66, 99, 235, 0.1)',
+            tension: 0.4,
+          },
+          {
+            label: 'Interactions',
+            data: data.interactions,
+            fill: true,
+            borderColor: 'rgb(66, 235, 156)',
+            backgroundColor: 'rgba(86, 235, 66, 0.1)',
+            tension: 0.4,
+          }
+        ]
+      });
+    } catch (error) {
+      console.error('Error fetching timeline data:', error);
+    }
   };
 
   const eventTypesData = {
@@ -128,7 +158,7 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="mt-8">
               <div className="bg-white rounded-lg shadow p-6">
                 <h2 className="text-xl font-bold mb-4">Events Timeline</h2>
                 <div className="h-80">
@@ -146,11 +176,12 @@ export default function Dashboard() {
                   />
                 </div>
               </div>
+            </div>
 
+            <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="bg-white rounded-lg shadow p-6">
                 <h2 className="text-xl font-bold mb-4">Event Types</h2>
                 <div className="h-80">
-                  
                   <Doughnut 
                     data={eventTypesData}
                     options={{
@@ -160,18 +191,18 @@ export default function Dashboard() {
                   />
                 </div>
               </div>
-            </div>
 
-            <div className="mt-8 bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-bold mb-4">Page Views by Section</h2>
-              <div className="h-80">
-                <Bar 
-                  data={sectionViewsData}
-                  options={{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                  }}
-                />
+              <div className="bg-white rounded-lg shadow p-6">
+                <h2 className="text-xl font-bold mb-4">Page Views by Section</h2>
+                <div className="h-80">
+                  <Bar 
+                    data={sectionViewsData}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                    }}
+                  />
+                </div>
               </div>
             </div>
           </>
