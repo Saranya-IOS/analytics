@@ -1,0 +1,86 @@
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<div class="flash-message-container" id="flashMessageContainer">
+<div class="flash">
+        {% for message in messages %}
+<div class="flash-msg">
+            {{ message }}
+<span class="close-btn" onclick="closeFlashMessage(this)">&times;</span>
+</div>
+        {% endfor %}
+</div>
+</div>
+ 
+<script>
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+        const container = document.getElementById('flashMessageContainer');
+        if (container) {
+            container.style.transition = 'all 0.5s ease-out';
+            container.style.opacity = '0';
+            container.style.height = '0px';
+            container.style.padding = '0';
+            container.style.margin = '0';
+            setTimeout(() => {
+                container.remove(); // Completely removes the element from the DOM
+            }, 500); // Wait for transition to complete
+        }
+    }, 5000);
+ 
+    // Manual close
+    function closeFlashMessage(btn) {
+        const msg = btn.parentElement;
+        const container = document.getElementById('flashMessageContainer');
+        msg.style.opacity = '0';
+        msg.style.transform = 'translateY(-10px)';
+        msg.style.transition = 'all 0.3s ease-in';
+        setTimeout(() => {
+            if (container) container.remove();
+        }, 300);
+    }
+</script>
+{% endif %}
+{% endwith %}
+
+<style>
+  .flash-message-container {
+    margin-bottom: 15px;
+    transition: all 0.5s ease;
+}
+ 
+.flash {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+ 
+.flash-msg {
+    background-color: #f44336;
+    color: white;
+    padding: 12px 16px;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative;
+    animation: fadeIn 0.3s ease-in;
+}
+ 
+.flash-msg .close-btn {
+    position: absolute;
+    right: 12px;
+    top: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+}
+ 
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
