@@ -9,11 +9,11 @@ export default function TopPagesChart({ data }) {
               <span className="w-6 h-6 bg-blue-100 text-blue-800 rounded-full flex items-center justify-center text-sm font-semibold">
                 {index + 1}
               </span>
-              <span className="ml-3">{page.screen}</span>
+              <span className="ml-3">{page.screen_name}</span>
             </div>
             <div className="text-right">
-              <div className="font-semibold">{page.events} events</div>
-              <div className="text-sm text-gray-500">{page.users} users</div>
+              <div className="font-semibold">{page.event_count} events</div>
+              <div className="text-sm text-gray-500">{page.user_count} users</div>
             </div>
           </div>
         ))}
