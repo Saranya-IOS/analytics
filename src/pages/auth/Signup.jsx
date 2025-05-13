@@ -13,10 +13,31 @@ export default function Signup() {
     e.preventDefault();
     setError(null);
     setLoading(true);
-
+  
     try {
-      // Add your signup logic here
-      console.log('Signup attempt with:', { fullName, email, password });
+      const [first_name, ...rest] = fullName.trim().split(' ');
+      const last_name = rest.join(' ') || '';
+  
+      const response = await fetch('http://localhost:5000/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          first_name,
+          last_name,
+          password,
+        }),
+      });
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(data.msg || 'Signup failed');
+      }
+  
+      // Optional: Redirect or auto-login
       navigate('/dashboard');
     } catch (error) {
       setError(error.message);
@@ -24,6 +45,7 @@ export default function Signup() {
       setLoading(false);
     }
   };
+  
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center p-4">

@@ -12,17 +12,33 @@ export default function Login() {
     e.preventDefault();
     setError(null);
     setLoading(true);
-
+  
     try {
-      // Add your login logic here
-      console.log('Login attempt with:', { email, password });
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(data.msg || 'Login failed');
+      }
+  
+      // Save JWT token to localStorage (or cookies, if you prefer)
+      localStorage.setItem('token', data.access_token);
+  
+      // Redirect to dashboard
       navigate('/dashboard');
     } catch (error) {
       setError(error.message);
     } finally {
       setLoading(false);
     }
-  };
+  };  
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center p-4">
