@@ -15,7 +15,6 @@ import {
   Filler
 } from 'chart.js';
 
-// Register ChartJS components
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -64,7 +63,6 @@ export default function Dashboard() {
     ]
   });
 
-  // Event distribution data
   const eventData = {
     total_events: 127,
     event_distribution: [
@@ -100,7 +98,6 @@ export default function Dashboard() {
 
   const { brightColors, dullColors } = generateColorPairs(eventData.event_distribution.length);
 
-  // New graph data states
   const [topPages, setTopPages] = useState([
     { screen: 'Home', events: 134, users: 38 },
     { screen: 'Profile', events: 82, users: 22 },
@@ -143,6 +140,96 @@ export default function Dashboard() {
     }
     fetchTimelineData();
   }, []);
+
+  useEffect(() => {
+    const canvas = document.getElementById('events-distribution-chart');
+    const tooltipBox = document.getElementById('tooltipBox');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    const labels = eventData.event_distribution.map(e => e.event_name);
+    const counts = eventData.event_distribution.map(e => e.count);
+
+    const chart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels,
+        datasets: [{
+          data: counts,
+          backgroundColor: dullColors,
+          borderColor: '#ffffff',
+          borderWidth: 2,
+          hoverOffset: 60,
+          hoverBorderWidth: 4,
+          hoverBorderColor: '#fff'
+        }]
+      },
+      options: {
+        cutout: '65%',
+        layout: {
+          padding: {
+            left: 40,
+            right: 40,
+            top: 30,
+            bottom: 30
+          }
+        },
+        responsive: true,
+        animation: { duration: 600, easing: 'easeOutExpo' },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            enabled: false,
+            external: function(context) {
+              const tooltipModel = context.tooltip;
+
+              if (tooltipModel.opacity === 0) {
+                tooltipBox.style.display = 'none';
+                return;
+              }
+
+              const index = tooltipModel.dataPoints[0].dataIndex;
+              const event = eventData.event_distribution[index];
+              const chartCanvas = context.chart.canvas;
+              const arc = context.tooltip.dataPoints[0].element;
+
+              const angle = (arc.startAngle + arc.endAngle) / 2;
+              const radius = (arc.outerRadius + arc.innerRadius) / 2;
+
+              const chartCenterX = chartCanvas.offsetLeft + chartCanvas.width / 2;
+              const chartCenterY = chartCanvas.offsetTop + chartCanvas.height / 2;
+
+              const tooltipX = chartCenterX + Math.cos(angle) * radius;
+              const tooltipY = chartCenterY + Math.sin(angle) * radius;
+
+              tooltipBox.innerHTML = `
+                <div class="title">${event.event_name}</div>
+                <div class="metrics">${event.count} events</div>
+                <div class="details">${event.percentage.toFixed(1)}% of total</div>
+              `;
+
+              tooltipBox.style.display = 'block';
+              tooltipBox.style.left = tooltipX - (tooltipBox.offsetWidth / 2) - 100 + 'px';
+              tooltipBox.style.top = tooltipY - (tooltipBox.offsetHeight / 2) - 50 + 'px';
+            }
+          }
+        },
+        hover: {
+          onHover: (event, chartElements) => {
+            const dataset = chart.data.datasets[0];
+            dataset.backgroundColor = dataset.backgroundColor.map((color, i) =>
+              chartElements[0]?.index === i ? brightColors[i] : dullColors[i]
+            );
+            chart.update('none');
+          }
+        }
+      }
+    });
+
+    return () => {
+      chart.destroy();
+    };
+  }, [eventData, brightColors, dullColors]);
 
   const fetchTimelineData = async () => {
     try {
