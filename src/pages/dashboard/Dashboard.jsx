@@ -144,18 +144,21 @@ export default function Dashboard() {
       });
 
       // Fetch top pages data
-      const topPagesResponse = await fetch('http://localhost:5000/api/analytics/top_pages');
+      const topPagesResponse = await fetch('http://localhost:5000/api/analytics/top_screens');
       const topPagesData = await topPagesResponse.json();
       setTopPages(topPagesData);
 
       // Fetch event distribution data
-      const eventDistResponse = await fetch('http://localhost:5000/api/analytics/event_distribution');
+      const eventDistResponse = await fetch('http://localhost:5000/api/analytics/event_donut');
       const eventDistData = await eventDistResponse.json();
       setEventData(eventDistData);
 
       // Fetch user interactions data
       const interactionsResponse = await fetch('http://localhost:5000/api/analytics/user_interactions');
       const interactionsData = await interactionsResponse.json();
+      interactionsData.labels = interactionsData.map(item => item.screen_name);
+      interactionsData.touch_counts = interactionsData.map(item => item.touch_count);
+      interactionsData.scroll_counts = interactionsData.map(item => item.scroll_count);
       setUserInteractions({
         labels: interactionsData.labels,
         datasets: [
@@ -175,6 +178,9 @@ export default function Dashboard() {
       // Fetch screen visited data
       const screenVisitedResponse = await fetch('http://localhost:5000/api/analytics/screen_visited');
       const screenVisitedData = await screenVisitedResponse.json();
+      screenVisitedData.labels = screenVisitedData.map(item => item.screen_name);
+      screenVisitedData.counts = screenVisitedData.map(item => item.event_count);
+      
       setScreenVisited({
         labels: screenVisitedData.labels,
         datasets: [{
