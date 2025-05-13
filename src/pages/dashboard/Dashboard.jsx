@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Line, Doughnut, Bar } from 'react-chartjs-2';
 import {
@@ -33,6 +33,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [user, setUser] = useState(null);
+  const chartRef = useRef(null);
   const [timelineData, setTimelineData] = useState({
     labels: [],
     datasets: [
@@ -63,6 +64,42 @@ export default function Dashboard() {
     ]
   });
 
+  // Event distribution data
+  const eventData = {
+    total_events: 127,
+    event_distribution: [
+      { event_name: "App Opened", count: 47, percentage: 7.1 },
+      { event_name: "Button Clicked", count: 32, percentage: 10.2 },
+      { event_name: "Incident created", count: 25, percentage: 30.68 },
+      { event_name: "Log In", count: 23, percentage: 25.11 },
+      { event_name: "App Closed", count: 47, percentage: 18.92 },
+      { event_name: "LogOut", count: 32, percentage: 5.2 },
+      { event_name: "Home Screen", count: 25, percentage: 2.68 },
+      { event_name: "Raised Request", count: 23, percentage: 0.11 }
+    ]
+  };
+
+  const generateColorPairs = (count) => {
+    const predefinedBrightColors = [
+      '#FF5733', '#33C3FF', '#FF33F6', '#75FF33', '#FFC300',
+      '#8E44AD', '#FF6F61', '#00E6E6', '#FF8C00', '#1E90FF'
+    ];
+    const brightColors = [];
+    const dullColors = [];
+
+    for (let i = 0; i < count; i++) {
+      const base = predefinedBrightColors[i % predefinedBrightColors.length];
+      brightColors.push(base);
+      const r = parseInt(base.slice(1, 3), 16);
+      const g = parseInt(base.slice(3, 5), 16);
+      const b = parseInt(base.slice(5, 7), 16);
+      dullColors.push(`rgba(${r}, ${g}, ${b}, 0.5)`);
+    }
+    return { brightColors, dullColors };
+  };
+
+  const { brightColors, dullColors } = generateColorPairs(eventData.event_distribution.length);
+
   // New graph data states
   const [topPages, setTopPages] = useState([
     { screen: 'Home', events: 134, users: 38 },
@@ -71,23 +108,6 @@ export default function Dashboard() {
     { screen: 'Login', events: 67, users: 18 },
     { screen: 'Make Request', events: 87, users: 10 }
   ]);
-
-  const [eventCounts, setEventCounts] = useState({
-    labels: ['App Opened', 'Button Clicked', 'Incident Created', 'Log In', 'App Closed', 'LogOut', 'Home Screen', 'Raised Request'],
-    datasets: [{
-      data: [30, 25, 15, 20, 25, 20, 25, 20],
-      backgroundColor: [
-        '#FF6384',
-        '#36A2EB',
-        '#FF9F40',
-        '#4BC0C0',
-        '#FFCD56',
-        '#9966FF',
-        '#FF6384',
-        '#36A2EB'
-      ]
-    }]
-  });
 
   const [userInteractions, setUserInteractions] = useState({
     labels: ['Home', 'Profile', 'Settings', 'Dashboard'],
@@ -315,23 +335,21 @@ export default function Dashboard() {
             {/* Event Counts */}
             <div className="bg-white rounded-lg shadow p-6">
               <h2 className="text-xl font-bold mb-4">Event Counts</h2>
-              <div className="h-80">
-                <Doughnut 
-                  data={eventCounts}
-                  options={{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                      legend: {
-                        position: 'right',
-                        labels: {
-                          boxWidth: 12
-                        }
-                      }
-                    },
-                    cutout: '60%'
-                  }}
-                />
+              <div className="relative h-80">
+                <canvas id="events-distribution-chart"></canvas>
+                <div id="tooltipBox" className="absolute hidden bg-white p-3 rounded-lg shadow-lg border border-gray-200">
+                  <div className="title font-semibold"></div>
+                  <div className="metrics text-sm text-gray-600"></div>
+                  <div className="details text-sm text-gray-500"></div>
+                </div>
+                <div id="customLegend" className="absolute right-0 top-1/2 transform -translate-y-1/2 space-y-2">
+                  {eventData.event_distribution.map((event, index) => (
+                    <div key={index} className="flex items-center space-x-2">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: brightColors[index] }}></div>
+                      <span className="text-sm">{event.event_name}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
