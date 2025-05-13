@@ -5,7 +5,8 @@ export default function Events() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [limit, setLimit] = useState(20);
+  const [limit, setLimit] = useState(10);
+  const [total, setTotal] = useState(0);
   const [filters, setFilters] = useState({
     eventType: '',
     dateRange: '30'
@@ -18,12 +19,15 @@ export default function Events() {
   const fetchEvents = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:5000/api/analytics/screen_list`);
+      const response = await fetch(
+        `http://localhost:5000/api/analytics/events?page=${currentPage}&limit=${limit}&event_type=${filters.eventType}`
+      );
       if (!response.ok) {
         throw new Error('Failed to fetch events');
       }
       const data = await response.json();
-      setEvents(data);
+      setEvents(data.events);
+      setTotal(data.total);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -36,6 +40,7 @@ export default function Events() {
       ...prev,
       [e.target.name]: e.target.value
     }));
+    setCurrentPage(1); // Reset to first page when filters change
   };
 
   if (loading) {
@@ -65,7 +70,7 @@ export default function Events() {
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">Events</h2>
-          <p className="text-gray-600">Showing {events.length} events</p>
+          <p className="text-gray-600">Showing {events.length} of {total} events</p>
         </div>
 
         {/* Filters */}
@@ -81,11 +86,8 @@ export default function Events() {
               className="w-full rounded-lg border border-gray-300 p-2"
             >
               <option value="">All Events</option>
-              <option value="page_view">Page View</option>
-              <option value="button_click">Button Click</option>
-              <option value="signup">Signup</option>
-              <option value="login">Login</option>
-              <option value="purchase">Purchase</option>
+              <option value="ACTION_EVENT">Action Event</option>
+              <option value="GEN_EVENT">General Event</option>
             </select>
           </div>
 
@@ -122,22 +124,44 @@ export default function Events() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Screen Name
+                  Event Name
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Event Count
+                  User ID
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Unique Users
+                  Event Type
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Screen
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Touch Count
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Scroll Count
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Timestamp
                 </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {events.map((event, index) => (
                 <tr key={index}>
+                  <td className="px-6 py-4 whitespace-nowrap">{event.event_name}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{event.user_id}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                      {event.event_type}
+                    </span>
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap">{event.screen_name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{event.event_count}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{event.unique_user_count}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{event.touch_count}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{event.scroll_count}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {new Date(event.timestamp).toLocaleString()}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -157,14 +181,18 @@ export default function Events() {
             <span>Page {currentPage}</span>
             <button
               onClick={() => setCurrentPage(prev => prev + 1)}
-              className="px-3 py-1 border rounded-md"
+              disabled={currentPage * limit >= total}
+              className="px-3 py-1 border rounded-md disabled:opacity-50"
             >
               Next
             </button>
           </div>
           <select
             value={limit}
-            onChange={(e) => setLimit(Number(e.target.value))}
+            onChange={(e) => {
+              setLimit(Number(e.target.value));
+              setCurrentPage(1);
+            }}
             className="border rounded-md p-1"
           >
             <option value="10">10 per page</option>
