@@ -191,3 +191,66 @@ def screen_visited():
     ]
     result = mongo.db.events.aggregate(pipeline)
     return jsonify([{"screen_name": item["_id"], "event_count": item["event_count"]} for item in result])
+
+@analytics_bp.route("/events", methods=["GET"])
+def list_events():
+    try:
+        # Pagination
+        page = int(request.args.get("page", 1))
+        limit = int(request.args.get("limit", 10))
+        if page < 1 or limit < 1:
+            return jsonify({"error": "Page and limit must be positive integers."}), 400
+
+        skip = (page - 1) * limit
+
+        # Filters
+        filters = {}
+        for field in ["event_type", "screen_name", "user_id", "device_id"]:
+            value = request.args.get(field)
+            if value:  # Skip if value is None or empty string
+                filters[field] = value
+
+        # Date range
+        start_date = request.args.get("start_date")
+        end_date = request.args.get("end_date")
+        if start_date or end_date:
+            filters["created_at"] = {}
+            if start_date:
+                filters["created_at"]["$gte"] = datetime.fromisoformat(start_date)
+            if end_date:
+                filters["created_at"]["$lte"] = datetime.fromisoformat(end_date)
+
+        # Query
+        cursor = (
+            mongo.db.events
+            .find(filters)
+            .sort("created_at", -1)
+            .skip(skip)
+            .limit(limit)
+        )
+
+        events = []
+        for doc in cursor:
+            event = {
+                "event_name": doc.get("event_name", ""),          # Customize fallback as needed
+                "user_id": doc.get("user_id", ""),
+                "event_type": doc.get("event_type", ""),
+                "screen_name": doc.get("screen_name", ""),
+                "touch_count": doc.get("touch_count", 0),
+                "scroll_count": doc.get("scroll_count", 0),
+                "timestamp": doc.get("created_at").isoformat() if doc.get("created_at") else None
+            }
+            events.append(event)
+
+        total = mongo.db.events.count_documents(filters)
+
+        return jsonify({
+            "page": page,
+            "limit": limit,
+            "total": total,
+            "count": len(events),
+            "events": events
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
