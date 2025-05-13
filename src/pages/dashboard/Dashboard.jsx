@@ -13,6 +13,8 @@ import {
   ArcElement,
   BarElement,
   Filler
+  BarElement,
+  Filler
 } from 'chart.js';
 
 // Import components
@@ -44,7 +46,7 @@ export default function Dashboard() {
     labels: [],
     datasets: [
       {
-        label: 'Events',
+        label: 'Users',
         data: [],
         fill: true,
         borderColor: 'rgba(66, 99, 235, 1)',
@@ -56,7 +58,7 @@ export default function Dashboard() {
         pointBorderWidth: 2
       },
       {
-        label: 'Interactions',
+        label: 'Sessions',
         data: [],
         fill: true,
         borderColor: 'rgb(66, 235, 156)',
