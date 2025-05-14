@@ -38,7 +38,7 @@ def create_event():
         })
 
     if valid_events:
-        mongo.db.user_events.insert_many(valid_events)
+        mongo.db.events.insert_many(valid_events)
         return jsonify({
             "message": f"{len(valid_events)} event(s) created",
             "event_ids": [e["event_id"] for e in valid_events]
