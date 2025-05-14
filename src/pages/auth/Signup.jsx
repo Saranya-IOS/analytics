@@ -38,7 +38,7 @@ export default function Signup() {
       }
   
       // Optional: Redirect or auto-login
-      navigate('/dashboard');
+      navigate('/login');
     } catch (error) {
       setError(error.message);
     } finally {
