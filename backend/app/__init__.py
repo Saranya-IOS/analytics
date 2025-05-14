@@ -22,4 +22,12 @@ def create_app():
     from .routes.analytics import analytics_bp
     app.register_blueprint(analytics_bp, url_prefix='/api/analytics')
 
+    from app.routes.user_routes import user_bp
+    from app.routes.session_routes import session_bp
+    from app.routes.event_routes import event_bp
+
+    app.register_blueprint(user_bp, url_prefix="/api/app_user")
+    app.register_blueprint(session_bp, url_prefix="/api/app_user")
+    app.register_blueprint(event_bp, url_prefix="/api/app_user")
+
     return app

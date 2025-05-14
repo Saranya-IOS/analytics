@@ -2,6 +2,10 @@
 import uuid
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime, timezone
+
+def now_utc():
+    return datetime.now(timezone.utc)
 
 def hash_password(password):
     return generate_password_hash(password)
