@@ -23,53 +23,46 @@ admin_users_collection = db.admin_users
 fake = Faker()
 
 def seed_data():
-    # Clear collections
+    # Clear only non-master collections
     app_users_collection.delete_many({})
     user_sessions_collection.delete_many({})
     events_collection.delete_many({})
-    accounts_collection.delete_many({})
     admin_users_collection.delete_many({})
+
+    # Fetch existing accounts with instances
+    accounts = list(accounts_collection.find({}))
+    if not accounts:
+        print("❌ No accounts found in 'accounts' collection. Seeding aborted.")
+        return
 
     users = []
     sessions = []
     events = []
-    accounts = []
     admin_users = []
 
-    # Step 1: Create accounts
-    account_types = ["Standard", "Premium", "Enterprise"]
-    instance_types = ["UAT", "PROD"]
-
-    for i in range(20):  # Create 20 accounts
-        account_id = f"ACC-{fake.uuid4()[:8]}"
-        instance_id = f"INST-{fake.uuid4()[:6]}"
-        account_doc = {
-            "_id": ObjectId(),
-            "account_id": account_id,
-            "account_type": random.choice(account_types),
-            "account_instance": random.choice(instance_types),
-            "instance_id": instance_id
-        }
-        accounts.append(account_doc)
-
-    accounts_collection.insert_many(accounts)
-    print(f"✅ Inserted {len(accounts)} accounts.")
-
-    # Step 2: Create app users
+    # Step 1: Create app users
     for i in range(100):  # 100 users
         user_id = f"{fake.uuid4()}"
         created_at = fake.date_time_this_year(tzinfo=UTC)
         last_login = fake.date_time_this_month(tzinfo=UTC)
 
-        user_accounts = random.sample(accounts, k=random.randint(1, 3))
-        account_details = [
-            {"account_id": acc["account_id"], "instance_id": acc["instance_id"]}
-            for acc in user_accounts
-        ]
+        # Choose 1–3 random accounts, and sample one instance from each
+        selected_accounts = random.sample(accounts, k=random.randint(1, 3))
+        account_details = []
+        for acc in selected_accounts:
+            if acc.get("instances"):
+                inst = random.choice(acc["instances"])
+                account_details.append({
+                    "account_id": acc["account_id"],
+                    "instance_id": inst["instance_id"]
+                })
+
+        if not account_details:
+            continue  # skip user if no instance available
+
         primary_account = random.choice(account_details)
 
         user_doc = {
-            
             "_id": ObjectId(),
             "user_id": user_id,
             "full_name": fake.name(),
@@ -116,7 +109,6 @@ def seed_data():
         # Events
         for _ in range(200):
             event_created = fake.date_time_between(start_date=session_start, end_date=session_end, tzinfo=UTC)
-
             event_doc = {
                 "_id": ObjectId(),
                 "event_id": f"{fake.uuid4()}",
@@ -131,32 +123,34 @@ def seed_data():
             }
             events.append(event_doc)
 
-    # Insert user-related data
     app_users_collection.insert_many(users)
     user_sessions_collection.insert_many(sessions)
     events_collection.insert_many(events)
 
-    # Step 3: Create admin users
+    # Step 2: Create admin users
     for _ in range(5):  # 5 admin users
         full_name = fake.name()
         first_name = full_name.split(" ")[0]
         last_name = full_name.split(" ")[-1]
         email = fake.email()
-        password = generate_password_hash("admin123")  # default password
+        password = generate_password_hash("admin123")
 
-        admin_accounts = random.sample(accounts, k=random.randint(1, 2))
-        account_details = [
-            {"account_id": acc["account_id"], "instance_id": acc["instance_id"]}
-            for acc in admin_accounts
-        ]
+        selected_accounts = random.sample(accounts, k=random.randint(1, 2))
+        account_details = []
+        for acc in selected_accounts:
+            if acc.get("instances"):
+                inst = random.choice(acc["instances"])
+                account_details.append({
+                    "account_id": acc["account_id"],
+                    "instance_id": inst["instance_id"]
+                })
 
         admin_user_doc = {
-            
             "_id": ObjectId(),
             "admin_user_email": email,
             "first_name": first_name,
             "last_name": last_name,
-            "full_name": fake.name(),
+            "full_name": full_name,
             "password": password,
             "created_at": datetime.now(UTC),
             "last_login": None,
@@ -166,8 +160,8 @@ def seed_data():
         admin_users.append(admin_user_doc)
 
     admin_users_collection.insert_many(admin_users)
-    print(f"✅ Seeded {len(users)} app users, {len(sessions)} sessions, {len(events)} events, {len(admin_users)} admin users.")
 
+    print(f"✅ Seeded {len(users)} app users, {len(sessions)} sessions, {len(events)} events, {len(admin_users)} admin users.")
     print("📂 Collections created:", db.list_collection_names())
 
 if __name__ == "__main__":
