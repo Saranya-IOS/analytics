@@ -1,0 +1,174 @@
+from faker import Faker
+import random
+from datetime import datetime, timedelta, UTC
+from bson.objectid import ObjectId
+from pymongo import MongoClient
+from werkzeug.security import generate_password_hash
+import uuid
+
+# MongoDB setup
+MONGO_URI = "mongodb://admin:secret@localhost:27017/dashboardDB?authSource=admin"
+DB_NAME = "dashboardDB"
+client = MongoClient(MONGO_URI)
+db = client[DB_NAME]
+
+# Collections
+app_users_collection = db.app_users
+user_sessions_collection = db.user_sessions
+events_collection = db.events
+accounts_collection = db.accounts
+admin_users_collection = db.admin_users
+
+# Faker setup
+fake = Faker()
+
+def seed_data():
+    # Clear collections
+    app_users_collection.delete_many({})
+    user_sessions_collection.delete_many({})
+    events_collection.delete_many({})
+    accounts_collection.delete_many({})
+    admin_users_collection.delete_many({})
+
+    users = []
+    sessions = []
+    events = []
+    accounts = []
+    admin_users = []
+
+    # Step 1: Create accounts
+    account_types = ["Standard", "Premium", "Enterprise"]
+    instance_types = ["UAT", "PROD"]
+
+    for i in range(20):  # Create 20 accounts
+        account_id = f"ACC-{fake.uuid4()[:8]}"
+        instance_id = f"INST-{fake.uuid4()[:6]}"
+        account_doc = {
+            "_id": ObjectId(),
+            "account_id": account_id,
+            "account_type": random.choice(account_types),
+            "account_instance": random.choice(instance_types),
+            "instance_id": instance_id
+        }
+        accounts.append(account_doc)
+
+    accounts_collection.insert_many(accounts)
+    print(f"✅ Inserted {len(accounts)} accounts.")
+
+    # Step 2: Create app users
+    for i in range(100):  # 100 users
+        user_id = f"{fake.uuid4()}"
+        created_at = fake.date_time_this_year(tzinfo=UTC)
+        last_login = fake.date_time_this_month(tzinfo=UTC)
+
+        user_accounts = random.sample(accounts, k=random.randint(1, 3))
+        account_details = [
+            {"account_id": acc["account_id"], "instance_id": acc["instance_id"]}
+            for acc in user_accounts
+        ]
+        primary_account = random.choice(account_details)
+
+        user_doc = {
+            
+            "_id": ObjectId(),
+            "user_id": user_id,
+            "full_name": fake.name(),
+            "user_email": fake.email(),
+            "created_at": created_at,
+            "last_login": last_login,
+            "account_details": account_details
+        }
+        users.append(user_doc)
+
+        # Session
+        session_id = ObjectId()
+        session_start = fake.date_time_this_year(tzinfo=UTC)
+        session_end = session_start + timedelta(minutes=random.randint(10, 120))
+
+        session_doc = {
+            "_id": session_id,
+            "user_id": user_id,
+            "session_id": fake.uuid4(),
+            "started_at": session_start,
+            "ended_at": session_end,
+            "account_id": primary_account["account_id"],
+            "instance_id": primary_account["instance_id"],
+            "app_details": {
+                "selected_app": "Training",
+                "app_domain": "Mitsubishi",
+                "app_version": f"1.0.{random.randint(0, 9)}"
+            },
+            "device_details": {
+                "device_id": fake.uuid4(),
+                "platform": random.choice(["Android", "iOS"]),
+                "os_version": f"{random.randint(1, 12)}.{random.randint(0, 9)}",
+                "model": random.choice(["Pixel 5", "iPhone 13", "Galaxy S21"])
+            },
+            "location": {
+                "latitude": float(fake.latitude()),
+                "longitude": float(fake.longitude()),
+                "city": fake.city(),
+                "country": fake.country()
+            }
+        }
+        sessions.append(session_doc)
+
+        # Events
+        for _ in range(200):
+            event_created = fake.date_time_between(start_date=session_start, end_date=session_end, tzinfo=UTC)
+
+            event_doc = {
+                "_id": ObjectId(),
+                "event_id": f"{fake.uuid4()}",
+                "user_id": user_id,
+                "session_id": session_doc["session_id"],
+                "event_type": random.choice(["GEN_EVENT", "USER", "ACTION_EVENT", "APP_FUNCTIONS"]),
+                "event_name": random.choice(["Login", "Clicked Button", "Logout", "App Open", "App Close"]),
+                "screen_name": random.choice(["Home", "Profile", "Settings"]),
+                "scroll_count": random.randint(0, 30),
+                "touch_count": random.randint(0, 50),
+                "created_at": event_created
+            }
+            events.append(event_doc)
+
+    # Insert user-related data
+    app_users_collection.insert_many(users)
+    user_sessions_collection.insert_many(sessions)
+    events_collection.insert_many(events)
+
+    # Step 3: Create admin users
+    for _ in range(5):  # 5 admin users
+        full_name = fake.name()
+        first_name = full_name.split(" ")[0]
+        last_name = full_name.split(" ")[-1]
+        email = fake.email()
+        password = generate_password_hash("admin123")  # default password
+
+        admin_accounts = random.sample(accounts, k=random.randint(1, 2))
+        account_details = [
+            {"account_id": acc["account_id"], "instance_id": acc["instance_id"]}
+            for acc in admin_accounts
+        ]
+
+        admin_user_doc = {
+            
+            "_id": ObjectId(),
+            "admin_user_email": email,
+            "first_name": first_name,
+            "last_name": last_name,
+            "full_name": fake.name(),
+            "password": password,
+            "created_at": datetime.now(UTC),
+            "last_login": None,
+            "admin_user_id": str(uuid.uuid4()),
+            "account_details": account_details
+        }
+        admin_users.append(admin_user_doc)
+
+    admin_users_collection.insert_many(admin_users)
+    print(f"✅ Seeded {len(users)} app users, {len(sessions)} sessions, {len(events)} events, {len(admin_users)} admin users.")
+
+    print("📂 Collections created:", db.list_collection_names())
+
+if __name__ == "__main__":
+    seed_data()
