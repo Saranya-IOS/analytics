@@ -25,9 +25,11 @@ def create_app():
     from app.routes.user_routes import user_bp
     from app.routes.session_routes import session_bp
     from app.routes.event_routes import event_bp
-
+    from app.routes.account_routes import account_bp
+    
     app.register_blueprint(user_bp, url_prefix="/api/app_user")
     app.register_blueprint(session_bp, url_prefix="/api/app_user")
     app.register_blueprint(event_bp, url_prefix="/api/app_user")
+    app.register_blueprint(account_bp, url_prefix="/api/app_user")
 
     return app
