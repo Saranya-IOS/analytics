@@ -14,12 +14,12 @@ export default function Users() {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:5000/api/analytics/users_list?page=${currentPage}&limit=${limit}`);
+      const response = await fetch(`http://localhost:5000/api/app_user/list?page=${currentPage}&limit=${limit}`);
       if (!response.ok) {
         throw new Error('Failed to fetch users');
       }
       const data = await response.json();
-      setUsers(data);
+      setUsers(data.data);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -65,17 +65,17 @@ export default function Users() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   User ID
                 </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 tracking-wider">
+                  Full Name
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Email
+                </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   First Seen
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Last Seen
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Total Events
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Platform
                 </th>
               </tr>
             </thead>
@@ -83,18 +83,19 @@ export default function Users() {
               {users.map((user, index) => (
                 <tr key={index}>
                   <td className="px-6 py-4 whitespace-nowrap">{user.user_id}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{user.full_name}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{user.user_email}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {new Date(user.first_seen).toLocaleDateString()}
+                    {new Date(user.created_at.$date).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {new Date(user.last_seen).toLocaleDateString()}
+                    {new Date(user.last_login.$date).toLocaleDateString()}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">{user.total_events}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  {/* <td className="px-6 py-4 whitespace-nowrap">
                     <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
                       {user.platform || 'Unknown'}
                     </span>
-                  </td>
+                  </td> */}
                 </tr>
               ))}
             </tbody>

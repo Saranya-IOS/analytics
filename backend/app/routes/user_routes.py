@@ -28,3 +28,44 @@ def register_user():
 
     mongo.db.app_users.insert_one(user)
     return jsonify({"message": "User registered successfully"}), 201
+
+@user_bp.route("/list", methods=["GET"])
+def list_app_users():
+    try:
+        # Pagination params
+        page = int(request.args.get("page", 1))
+        limit = int(request.args.get("limit", 20))
+        skip = (page - 1) * limit
+
+        # Optional filters
+        user_id = request.args.get("user_id")
+        user_email = request.args.get("user_email")
+        account_id = request.args.get("account_id")
+
+        query = {}
+        if user_id:
+            query["user_id"] = user_id
+        if user_email:
+            query["user_email"] = user_email
+        if account_id:
+            query["account_details.account_id"] = account_id
+
+        # Total count for pagination
+        total = mongo.db.app_users.count_documents(query)
+
+        # Fetch paginated results
+        users = list(
+            mongo.db.app_users.find(query, {"_id": 0})
+            .skip(skip)
+            .limit(limit)
+        )
+
+        return jsonify({
+            "page": page,
+            "limit": limit,
+            "total": total,
+            "data": users
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
