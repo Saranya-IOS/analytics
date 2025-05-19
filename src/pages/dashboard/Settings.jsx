@@ -1,8 +1,19 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
 
 export default function Settings() {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [user, setUser] = useState(null);
+
+   useEffect(() => {
+      const storedUser = localStorage.getItem('userData');
+      if (storedUser) {
+        console.log("Stored User", storedUser);
+        setUser(JSON.parse(storedUser));
+      } 
+    }, []);
+  
 
   const handleCopyApiKey = () => {
     navigator.clipboard.writeText('ak_7f9a8d6e5c4b3a2f1e0d');
@@ -23,8 +34,9 @@ export default function Settings() {
             </label>
             <input
               type="email"
-              defaultValue="user@example.com"
-              className="w-full px-4 py-2 border rounded-lg"
+              defaultValue= {user?.admin_user_email || ''}
+              readOnly
+              className="w-full px-4 py-2 border rounded-lg bg-gray-100 cursor-not-allowed"
             />
           </div>
           <div>
@@ -34,10 +46,11 @@ export default function Settings() {
             <input
               type="password"
               defaultValue="••••••••"
-              className="w-full px-4 py-2 border rounded-lg"
+              readOnly
+              className="w-full px-4 py-2 border rounded-lg bg-gray-100 cursor-not-allowed"
             />
           </div>
-          <div>
+          {/*<div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Timezone
             </label>
@@ -48,7 +61,7 @@ export default function Settings() {
               <option value="America/Denver">Mountain Time (MT)</option>
               <option value="America/Los_Angeles">Pacific Time (PT)</option>
             </select>
-          </div>
+          </div> */}
           <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
             Save Changes
           </button>
@@ -98,7 +111,7 @@ export default function Settings() {
       </div>
 
       {/* API Access */}
-      <div className="bg-white rounded-lg shadow p-6">
+      {/* <div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-2xl font-bold mb-6">API Access</h2>
         <div className="space-y-4">
           <div>
@@ -146,10 +159,10 @@ export default function Settings() {
             View API Documentation
           </button>
         </div>
-      </div>
+      </div> *}
 
       {/* Danger Zone */}
-      <div className="bg-white rounded-lg shadow p-6 border border-red-200">
+      {/*<div className="bg-white rounded-lg shadow p-6 border border-red-200">
         <h2 className="text-2xl font-bold mb-6 text-red-600">Danger Zone</h2>
         <p className="text-gray-600 mb-4">
           These actions cannot be undone. Please proceed with caution.
@@ -162,7 +175,7 @@ export default function Settings() {
             Delete Account
           </button>
         </div>
-      </div>
+      </div>*/}
 
       {/* Toast Notification */}
       {showToast && (

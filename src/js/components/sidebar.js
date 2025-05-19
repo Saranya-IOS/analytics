@@ -23,7 +23,7 @@ export class SidebarComponent {
           </div>
           <div class="nav-item ${this.activeItem === '/events' ? 'active' : ''}" data-path="/events">
             <i class="fas fa-bolt"></i>
-            <span>Events</span>
+            <span>Events Loading now</span>
           </div>
           <div class="nav-item ${this.activeItem === '/users' ? 'active' : ''}" data-path="/users">
             <i class="fas fa-users"></i>

@@ -13,7 +13,7 @@ def hash_password(password):
 def verify_password(password, hashed):
     return check_password_hash(hashed, password)
 
-def create_admin_user(email, first_name, last_name, password):
+def create_admin_user(email, first_name, last_name, password, account_details):
     return {
         "admin_user_email": email,
         "first_name": first_name,
@@ -22,5 +22,6 @@ def create_admin_user(email, first_name, last_name, password):
         "role": "Admin",
         "created_at": datetime.utcnow(),
         "last_login": None,
-        "admin_user_id": str(uuid.uuid4())
+        "admin_user_id": str(uuid.uuid4()),
+        "account_details": account_details
     }

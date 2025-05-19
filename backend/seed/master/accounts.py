@@ -1,6 +1,6 @@
 from pymongo import MongoClient
 
-def seed_accounts(mongo_uri="mongodb://admin:secret@localhost:27017/dashboardDB?authSource=admin", db_name="dashboardDB"):
+def seed_accounts(mongo_uri="mongodb://localhost:27017/", db_name="dashboardDB"):
     """
     Seeds the 'accounts' collection with predefined master data.
 
@@ -26,7 +26,7 @@ def seed_accounts(mongo_uri="mongodb://admin:secret@localhost:27017/dashboardDB?
         },
         {
             "account_id": "ACC-mee-e60012",
-            "account_type": "mee",
+            "account_type": "mitsubishielectric",
             "instances": [
                 {"account_instance": "production", "instance_id": "3433667"},
                 {"account_instance": "development", "instance_id": "1068671"},
@@ -36,7 +36,7 @@ def seed_accounts(mongo_uri="mongodb://admin:secret@localhost:27017/dashboardDB?
         },
         {
             "account_id": "ACC-ame-124D75",
-            "account_type": "ame",
+            "account_type": "nttdata",
             "instances": [
                 {"account_instance": "sandbox", "instance_id": "463836"},
                 {"account_instance": "development", "instance_id": "0oaftrncm3swqV8Gp2p7"},
@@ -45,20 +45,20 @@ def seed_accounts(mongo_uri="mongodb://admin:secret@localhost:27017/dashboardDB?
                 {"account_instance": "production", "instance_id": "0oagzb4bncIKrwL0u2p7"}
             ]
         },
-        {
-            "account_id": "ACC-nttdata-e7a800",
-            "account_type": "nttdata",
-            "instances": [
-                {"account_instance": "production", "instance_id": "421801"},
-                {"account_instance": "development", "instance_id": "423045"},
-                {"account_instance": "uat", "instance_id": "424395"},
-                {"account_instance": "train", "instance_id": "427884"},
-                {"account_instance": "sandbox", "instance_id": "463836"}
-            ]
-        },
+        # {
+        #     "account_id": "ACC-nttdata-e7a800",
+        #     "account_type": "nttdata",
+        #     "instances": [
+        #         {"account_instance": "production", "instance_id": "421801"},
+        #         {"account_instance": "development", "instance_id": "423045"},
+        #         {"account_instance": "uat", "instance_id": "424395"},
+        #         {"account_instance": "train", "instance_id": "427884"},
+        #         {"account_instance": "sandbox", "instance_id": "463836"}
+        #     ]
+        # },
         {
             "account_id": "ACC-alter-e74315",
-            "account_type": "alter",
+            "account_type": "alterdomus",
             "instances": [
                 {"account_instance": "sbx", "instance_id": "1577180"},
                 {"account_instance": "dev", "instance_id": "1577185"},
@@ -69,7 +69,7 @@ def seed_accounts(mongo_uri="mongodb://admin:secret@localhost:27017/dashboardDB?
         },
         {
             "account_id": "ACC-demo-124D75",
-            "account_type": "demo",
+            "account_type": "nttdataservicesdemo02",
             "instances": [
                 {"account_instance": "demo", "instance_id": "854816"}
             ]

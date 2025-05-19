@@ -103,7 +103,13 @@ export default function TimelineChart({ data }) {
   }, [data]);
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
+    <div
+      className="card"
+      /* Use existing “card” class from your stylesheet for radius & shadow */
+      style={{
+        padding: 'var(--space-6)',
+      }}
+    >
       <h2 className="text-xl font-bold mb-4">Users Sessions Timeline</h2>
       <div className="h-80">
         <canvas id="timeline-chart"></canvas>

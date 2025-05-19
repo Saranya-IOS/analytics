@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { LayoutDashboard, BarChart2, Users as UsersIcon, FileText, Settings as SettingsIcon, LogOut } from 'lucide-react';
 import TimelineChart from '../../components/graphs/TimelineChart';
 import TopPagesChart from '../../components/graphs/TopPagesChart';
 import EventDistributionChart from '../../components/graphs/EventDistributionChart';
@@ -14,31 +15,77 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [totalUsers, setTotalUsers] = useState(null);
+  const [totalEvents, setTotalEvents] = useState(null);
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [timelineData, setTimelineData] = useState({ labels: [], datasets: [] });
   const [topPages, setTopPages] = useState([]);
   const [eventData, setEventData] = useState({ total_events: 0, event_distribution: [] });
   const [userInteractions, setUserInteractions] = useState({ labels: [], datasets: [] });
-  const [screenVisited, setScreenVisited] = useState({ labels: [], datasets: [] });
+  const [screenVisited, setScreenVisited] = useState([]);
+
+  useEffect(() => {
+    //fetchUsers();
+    //fetchEvents();
+  });
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`http://localhost:5000/api/app_user/list`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch users');
+      }
+      const data = await response.json();
+      console.log("User Counts", data.data.length);
+      setTotalUsers(data.data.length);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchEvents = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(
+        `http://localhost:5000/api/analytics/events`
+      );
+      if (!response.ok) {
+        throw new Error('Failed to fetch events');
+      }
+      const data = await response.json();
+      setTotalEvents(data.total);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Colors for charts
-  const brightColors = [
-    'rgba(66, 99, 235, 1)',
-    'rgba(126, 87, 194, 1)',
-    'rgba(0, 191, 165, 1)',
-    'rgba(76, 175, 80, 1)',
-    'rgba(255, 193, 7, 1)',
-    'rgba(244, 67, 54, 1)'
-  ];
+  const generateColorPairs = (count) => {
+    const predefinedBrightColors = [
+      '#FF5733', '#33C3FF', '#FF33F6', '#75FF33', '#FFC300',
+      '#8E44AD', '#FF6F61', '#00E6E6', '#FF8C00', '#1E90FF'
+    ];
+    const brightColors = [];
+    const dullColors = [];
 
-  const dullColors = [
-    'rgba(66, 99, 235, 0.8)',
-    'rgba(126, 87, 194, 0.8)',
-    'rgba(0, 191, 165, 0.8)',
-    'rgba(76, 175, 80, 0.8)',
-    'rgba(255, 193, 7, 0.8)',
-    'rgba(244, 67, 54, 0.8)'
-  ];
+    for (let i = 0; i < count; i++) {
+      const base = predefinedBrightColors[i % predefinedBrightColors.length];
+      brightColors.push(base);
+      const r = parseInt(base.slice(1, 3), 16);
+      const g = parseInt(base.slice(3, 5), 16);
+      const b = parseInt(base.slice(5, 7), 16);
+      dullColors.push(`rgba(${r}, ${g}, ${b}, 0.5)`);
+    }
+    return { brightColors, dullColors };
+  };
+
+  const { brightColors, dullColors } = generateColorPairs(eventData.event_distribution.length);
 
   useEffect(() => {
     const storedUser = localStorage.getItem('userData');
@@ -68,11 +115,11 @@ export default function Dashboard() {
     try {
       const response = await fetch('http://localhost:5000/api/analytics/users_sessions_line');
       const data = await response.json();
-      
+
       const labels = data.map(item => item.date);
       const userCounts = data.map(item => item.user_count);
       const sessionCounts = data.map(item => item.session_count);
-      
+
       setTimelineData({
         labels: labels,
         datasets: [
@@ -111,6 +158,7 @@ export default function Dashboard() {
     try {
       const response = await fetch('http://localhost:5000/api/analytics/top_screens');
       const data = await response.json();
+      console.log("Top Pages Data",data);
       setTopPages(data);
     } catch (error) {
       console.error('Error fetching top pages:', error);
@@ -131,7 +179,7 @@ export default function Dashboard() {
     try {
       const response = await fetch('http://localhost:5000/api/analytics/user_interactions');
       const data = await response.json();
-      
+
       setUserInteractions({
         labels: data.map(item => item.screen_name),
         datasets: [
@@ -156,15 +204,9 @@ export default function Dashboard() {
     try {
       const response = await fetch('http://localhost:5000/api/analytics/screen_visited');
       const data = await response.json();
-      
-      setScreenVisited({
-        labels: data.map(item => item.screen_name),
-        datasets: [{
-          label: 'Visits',
-          data: data.map(item => item.event_count),
-          backgroundColor: 'rgba(66, 99, 235, 0.8)',
-        }]
-      });
+      console.log("Screen Visited Chart Data:", data);
+ 
+      setScreenVisited(data);
     } catch (error) {
       console.error('Error fetching screen visited:', error);
     }
@@ -188,13 +230,13 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="bg-white rounded-lg shadow p-6">
                 <h3 className="text-xl font-semibold mb-2">Total Users</h3>
-                <p className="text-3xl font-bold">1,234</p>
-                <p className="text-green-500 text-sm mt-2">↑ 12.5% vs last period</p>
+                <p className="text-3xl font-bold">20</p>
+                <p className="text-red-500 text-sm mt-2">↓ 3.1% vs last period</p>
               </div>
               <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-xl font-semibold mb-2">Active Users</h3>
-                <p className="text-3xl font-bold">892</p>
-                <p className="text-green-500 text-sm mt-2">↑ 8.2% vs last period</p>
+                <h3 className="text-xl font-semibold mb-2">Total Events</h3>
+                <p className="text-3xl font-bold">20000</p>
+                <p className="text-green-500 text-sm mt-2">↑ 15.4% vs last period</p>
               </div>
               <div className="bg-white rounded-lg shadow p-6">
                 <h3 className="text-xl font-semibold mb-2">Total Revenue</h3>
@@ -205,7 +247,7 @@ export default function Dashboard() {
                 <h3 className="text-xl font-semibold mb-2">Conversion Rate</h3>
                 <p className="text-3xl font-bold">2.4%</p>
                 <p className="text-green-500 text-sm mt-2">↑ 15.4% vs last period</p>
-              </div>
+              </div> 
             </div>
 
             <div className="mt-6">
@@ -214,7 +256,7 @@ export default function Dashboard() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
               <TopPagesChart data={topPages} />
-              <EventDistributionChart 
+              <EventDistributionChart
                 data={eventData}
                 brightColors={brightColors}
                 dullColors={dullColors}
@@ -223,7 +265,7 @@ export default function Dashboard() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
               <UserInteractionsChart data={userInteractions} />
-              <ScreenVisitedChart data={screenVisited} />
+              <ScreenVisitedChart rawData={screenVisited} />
             </div>
           </>
         );
@@ -234,7 +276,7 @@ export default function Dashboard() {
       case 'reports':
         return <Reports />;
       case 'settings':
-        return <Settings />;
+        return <Settings />; 
       default:
         return null;
     }
@@ -246,45 +288,51 @@ export default function Dashboard() {
       <div className={`fixed inset-y-0 left-0 w-64 bg-gray-900 text-white transition-transform duration-200 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="p-6">
           <div className="flex items-center space-x-2">
-            <span className="text-2xl font-bold">Analytics Pro</span>
+            <span className="text-2xl font-bold">ServiceKey Analytics</span>
           </div>
         </div>
         <nav className="mt-6">
           <div className="px-4 space-y-2">
-            <button 
+            <button
+
               onClick={() => handleTabChange('dashboard')}
               className={`w-full flex items-center space-x-2 py-2 px-4 rounded-lg ${activeTab === 'dashboard' ? 'bg-blue-600' : 'hover:bg-gray-800'}`}
-            >
+            ><LayoutDashboard className="w-5 h-5" />
               <span>Dashboard</span>
             </button>
-            <button 
+            <button
+
               onClick={() => handleTabChange('events')}
               className={`w-full flex items-center space-x-2 py-2 px-4 rounded-lg ${activeTab === 'events' ? 'bg-blue-600' : 'hover:bg-gray-800'}`}
-            >
+            ><BarChart2 className="w-5 h-5" />
               <span>Events</span>
             </button>
-            <button 
+            <button
+
               onClick={() => handleTabChange('users')}
               className={`w-full flex items-center space-x-2 py-2 px-4 rounded-lg ${activeTab === 'users' ? 'bg-blue-600' : 'hover:bg-gray-800'}`}
-            >
+            ><UsersIcon className="w-5 h-5" />
               <span>Users</span>
             </button>
+            
             {/* <button 
               onClick={() => handleTabChange('reports')}
               className={`w-full flex items-center space-x-2 py-2 px-4 rounded-lg ${activeTab === 'reports' ? 'bg-blue-600' : 'hover:bg-gray-800'}`}
-            >
+            ><FileText className="w-5 h-5" />
               <span>Reports</span>
             </button> */}
+
             <button 
               onClick={() => handleTabChange('settings')}
               className={`w-full flex items-center space-x-2 py-2 px-4 rounded-lg ${activeTab === 'settings' ? 'bg-blue-600' : 'hover:bg-gray-800'}`}
-            >
+            ><SettingsIcon className="w-5 h-5" />
               <span>Settings</span>
             </button>
-            <button 
+            <button
+
               onClick={handleLogout}
               className="w-full flex items-center space-x-2 py-2 px-4 rounded-lg hover:bg-gray-800"
-            >
+            ><LogOut className="w-5 h-5" />
               <span>Logout</span>
             </button>
           </div>

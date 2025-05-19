@@ -33,6 +33,7 @@ export default function Login() {
         admin_user_id: data.admin_user_id,
         first_name: data.first_name,
         last_name: data.last_name,
+        admin_user_email: email
       }
       localStorage.setItem('token', data.access_token);
       localStorage.setItem("userData", JSON.stringify(userData))

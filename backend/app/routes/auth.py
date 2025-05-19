@@ -18,7 +18,8 @@ def signup():
         email=email,
         first_name=data.get("first_name"),
         last_name=data.get("last_name"),
-        password=data.get("password")
+        password=data.get("password"),
+        account_details=data.get("account_details")
     )
     mongo.db.admin_users.insert_one(new_user)
     return jsonify({"msg": "User registered successfully"}), 201

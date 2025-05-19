@@ -1,7 +1,26 @@
 export default function TopPagesChart({ data }) {
   return (
-    <div className="bg-white rounded-lg shadow p-6">
+    <div
+      className="card"
+      /* Use existing “card” class from your stylesheet for radius & shadow */
+    >
       <h2 className="text-xl font-bold mb-4">Top Pages by Screen</h2>
+      {/* Column headers */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr 1fr',
+          fontWeight: 'var(--font-medium)',
+          paddingBottom: '12px',
+          borderBottom: '2px solid var(--color-gray-300)',
+          marginBottom: '12px'
+        }}
+      >
+        <div>Screen</div>
+        <div style={{ textAlign: 'center' }}>Event Count</div>
+        <div style={{ textAlign: 'right' }}>Unique Users</div>
+      </div>
+      {/* Data rows */}
       <div className="space-y-2">
         {data.map((page, index) => (
           <div
@@ -15,8 +34,8 @@ export default function TopPagesChart({ data }) {
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center' }}>
-              <span 
-                className={`badge ${index === 0 ? 'badge-primary' : 'badge-secondary'}`} 
+              <span
+                className={`badge ${index === 0 ? 'badge-primary' : 'badge-secondary'}`}
                 style={{ marginRight: 'var(--space-2)' }}
               >
                 {index + 1}
