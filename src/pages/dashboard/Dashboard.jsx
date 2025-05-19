@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LayoutDashboard, BarChart2, Users as UsersIcon, FileText, Settings as SettingsIcon, LogOut } from 'lucide-react';
+import { LayoutDashboard, BarChart2, Users as UsersIcon, LogOut } from 'lucide-react';
 import TimelineChart from '../../components/graphs/TimelineChart';
 import TopPagesChart from '../../components/graphs/TopPagesChart';
 import EventDistributionChart from '../../components/graphs/EventDistributionChart';
@@ -24,44 +24,20 @@ export default function Dashboard() {
   const [eventData, setEventData] = useState({ total_events: 0, event_distribution: [] });
   const [userInteractions, setUserInteractions] = useState({ labels: [], datasets: [] });
   const [screenVisited, setScreenVisited] = useState([]);
+  const [logoBlob, setLogoBlob] = useState(null);
 
   useEffect(() => {
-    //fetchUsers();
-    //fetchEvents();
-  });
+    fetchLogo();
+  }, []);
 
-  const fetchUsers = async () => {
+  const fetchLogo = async () => {
     try {
-      setLoading(true);
-      const response = await fetch(`http://localhost:5000/api/app_user/list`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch users');
-      }
+      const response = await fetch('http://localhost:5000/api/logo');
       const data = await response.json();
-      console.log("User Counts", data.data.length);
-      setTotalUsers(data.data.length);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchEvents = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(
-        `http://localhost:5000/api/analytics/events`
-      );
-      if (!response.ok) {
-        throw new Error('Failed to fetch events');
-      }
-      const data = await response.json();
-      setTotalEvents(data.total);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+      // Assuming the API returns base64 encoded image
+      setLogoBlob(data.logo);
+    } catch (error) {
+      console.error('Error fetching logo:', error);
     }
   };
 
@@ -204,7 +180,6 @@ export default function Dashboard() {
       const response = await fetch('http://localhost:5000/api/analytics/screen_visited');
       const data = await response.json();
       console.log("Screen Visited Chart Data:", data);
- 
       setScreenVisited(data);
     } catch (error) {
       console.error('Error fetching screen visited:', error);
@@ -272,10 +247,8 @@ export default function Dashboard() {
         return <Events />;
       case 'users':
         return <Users />;
-      case 'reports':
-        return <Reports />;
       case 'settings':
-        return <Settings />; 
+        return <Settings />;
       default:
         return null;
     }
@@ -287,11 +260,13 @@ export default function Dashboard() {
       <div className={`fixed inset-y-0 left-0 w-64 bg-gray-900 text-white transition-transform duration-200 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="p-6">
           <div className="flex flex-col items-center space-y-4">
-            <img 
-              src="/mitsubishi-logo.png" 
-              alt="Mitsubishi Electric Logo" 
-              className="w-32 h-auto"
-            />
+            {logoBlob && (
+              <img 
+                src={`data:image/png;base64,${logoBlob}`}
+                alt="Company Logo" 
+                className="w-32 h-auto"
+              />
+            )}
             <span className="text-2xl font-bold">ServiceKey Analytics</span>
           </div>
         </div>
