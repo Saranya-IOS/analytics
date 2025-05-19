@@ -65,7 +65,6 @@ export default function Dashboard() {
     }
   };
 
-  // Colors for charts
   const generateColorPairs = (count) => {
     const predefinedBrightColors = [
       '#FF5733', '#33C3FF', '#FF33F6', '#75FF33', '#FFC300',
@@ -287,49 +286,36 @@ export default function Dashboard() {
       {/* Sidebar */}
       <div className={`fixed inset-y-0 left-0 w-64 bg-gray-900 text-white transition-transform duration-200 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="p-6">
-          <div className="flex items-center space-x-2">
+          <div className="flex flex-col items-center space-y-4">
+            <img 
+              src="/mitsubishi-logo.png" 
+              alt="Mitsubishi Electric Logo" 
+              className="w-32 h-auto"
+            />
             <span className="text-2xl font-bold">ServiceKey Analytics</span>
           </div>
         </div>
         <nav className="mt-6">
           <div className="px-4 space-y-2">
             <button
-
               onClick={() => handleTabChange('dashboard')}
               className={`w-full flex items-center space-x-2 py-2 px-4 rounded-lg ${activeTab === 'dashboard' ? 'bg-blue-600' : 'hover:bg-gray-800'}`}
             ><LayoutDashboard className="w-5 h-5" />
               <span>Dashboard</span>
             </button>
             <button
-
               onClick={() => handleTabChange('events')}
               className={`w-full flex items-center space-x-2 py-2 px-4 rounded-lg ${activeTab === 'events' ? 'bg-blue-600' : 'hover:bg-gray-800'}`}
             ><BarChart2 className="w-5 h-5" />
               <span>Events</span>
             </button>
             <button
-
               onClick={() => handleTabChange('users')}
               className={`w-full flex items-center space-x-2 py-2 px-4 rounded-lg ${activeTab === 'users' ? 'bg-blue-600' : 'hover:bg-gray-800'}`}
             ><UsersIcon className="w-5 h-5" />
               <span>Users</span>
             </button>
-            
-            {/* <button 
-              onClick={() => handleTabChange('reports')}
-              className={`w-full flex items-center space-x-2 py-2 px-4 rounded-lg ${activeTab === 'reports' ? 'bg-blue-600' : 'hover:bg-gray-800'}`}
-            ><FileText className="w-5 h-5" />
-              <span>Reports</span>
-            </button> */}
-
-            <button 
-              onClick={() => handleTabChange('settings')}
-              className={`w-full flex items-center space-x-2 py-2 px-4 rounded-lg ${activeTab === 'settings' ? 'bg-blue-600' : 'hover:bg-gray-800'}`}
-            ><SettingsIcon className="w-5 h-5" />
-              <span>Settings</span>
-            </button>
             <button
-
               onClick={handleLogout}
               className="w-full flex items-center space-x-2 py-2 px-4 rounded-lg hover:bg-gray-800"
             ><LogOut className="w-5 h-5" />
