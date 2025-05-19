@@ -87,7 +87,7 @@ def top_screens():
             }
         },
         {"$sort": {"event_count": -1}},  # Or use "user_count" if sorting by users
-        {"$limit": 10}
+        {"$limit": 5}
     ]
     result = mongo.db.events.aggregate(pipeline)
     return jsonify([

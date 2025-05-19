@@ -269,12 +269,12 @@ export default function Dashboard() {
             >
               <span>Users</span>
             </button>
-            <button 
+            {/* <button 
               onClick={() => handleTabChange('reports')}
               className={`w-full flex items-center space-x-2 py-2 px-4 rounded-lg ${activeTab === 'reports' ? 'bg-blue-600' : 'hover:bg-gray-800'}`}
             >
               <span>Reports</span>
-            </button>
+            </button> */}
             <button 
               onClick={() => handleTabChange('settings')}
               className={`w-full flex items-center space-x-2 py-2 px-4 rounded-lg ${activeTab === 'settings' ? 'bg-blue-600' : 'hover:bg-gray-800'}`}

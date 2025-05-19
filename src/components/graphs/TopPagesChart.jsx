@@ -35,7 +35,7 @@ export default function TopPagesChart({ data }) {
             </div>
             <div style={{ textAlign: 'right' }}>
               <span style={{ fontWeight: 'var(--font-semibold)' }}>
-                {page.unique_user_count}
+                {page.user_count}
               </span>
               <span style={{ color: 'var(--color-gray-500)', marginLeft: 'var(--space-1)' }}>
                 users
