@@ -26,16 +26,12 @@ export default function Dashboard() {
   const [screenVisited, setScreenVisited] = useState([]);
   const [logoBlob, setLogoBlob] = useState(null);
 
-  useEffect(() => {
-    fetchLogo();
-  }, []);
-
-  const fetchLogo = async () => {
+  const fetchLogo = async (account_id) => {
     try {
-      const response = await fetch('http://localhost:5000/api/logo');
+      const response = await fetch(`http://localhost:5000/api/app_user/logo/${account_id}`);
       const data = await response.json();
       // Assuming the API returns base64 encoded image
-      setLogoBlob(data.logo);
+      setLogoBlob(data.image);
     } catch (error) {
       console.error('Error fetching logo:', error);
     }
@@ -63,13 +59,19 @@ export default function Dashboard() {
   const { brightColors, dullColors } = generateColorPairs(eventData.event_distribution.length);
 
   useEffect(() => {
+    let userData;
     const storedUser = localStorage.getItem('userData');
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      userData = JSON.parse(storedUser)
+      setUser(userData);
     } else {
       navigate("/login");
     }
     fetchAllData();
+    if (userData.account_details && userData.account_details.length > 0) {
+      let accountDetails = userData.account_details[0]  
+      fetchLogo(accountDetails.account_id);
+    }
   }, []);
 
   const fetchAllData = async () => {
@@ -133,7 +135,6 @@ export default function Dashboard() {
     try {
       const response = await fetch('http://localhost:5000/api/analytics/top_screens');
       const data = await response.json();
-      console.log("Top Pages Data",data);
       setTopPages(data);
     } catch (error) {
       console.error('Error fetching top pages:', error);
@@ -179,7 +180,6 @@ export default function Dashboard() {
     try {
       const response = await fetch('http://localhost:5000/api/analytics/screen_visited');
       const data = await response.json();
-      console.log("Screen Visited Chart Data:", data);
       setScreenVisited(data);
     } catch (error) {
       console.error('Error fetching screen visited:', error);
