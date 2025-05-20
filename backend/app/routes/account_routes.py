@@ -20,3 +20,12 @@ def get_accounts():
 
     accounts = list(mongo.db.accounts.find(query, {"_id": 0}))  # exclude Mongo's _id field
     return jsonify(accounts), 200
+
+@account_bp.route("/logo/<account_id>", methods=["GET"])
+def get_logo(account_id):
+    account = mongo.db.accounts.find_one({"account_id": account_id}, {"logo": 1, "_id": 0})
+
+    if not account or "logo" not in account:
+        return jsonify({"error": "Logo not found"}), 404
+
+    return jsonify(account["logo"])

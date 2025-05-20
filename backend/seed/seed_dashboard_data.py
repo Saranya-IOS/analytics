@@ -116,11 +116,7 @@ def seed_data():
                 "session_id": session_doc["session_id"],
                 "event_type": random.choice(["GEN_EVENT", "USER", "ACTION_EVENT", "APP_FUNCTIONS"]),
                 "event_name": random.choice(["Login", "Clicked Button", "Logout", "App Open", "App Close"]),
-<<<<<<< Updated upstream
                 "screen_name": random.choice(["Home", "Profile", "Incidents", "Requests", "Ticket Status", "Change Password"]),
-=======
-                "screen_name": random.choice(["Home", "Profile", "Settings", "Something Broken", "Create Request"]),
->>>>>>> Stashed changes
                 "scroll_count": random.randint(0, 30),
                 "touch_count": random.randint(0, 50),
                 "created_at": event_created

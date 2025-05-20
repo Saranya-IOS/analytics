@@ -47,4 +47,5 @@ def login():
         "admin_user_id": user["admin_user_id"],
         "first_name": user["first_name"],
         "last_name": user["last_name"],
+        "account_details": user["account_details"]
     }), 200
