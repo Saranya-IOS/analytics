@@ -92,11 +92,11 @@ export default function Login() {
             </div>
           </div>
 
-          <div className="text-right">
+          {/*<div className="text-right">
             <Link to="/forgot-password" className="text-sm text-gray-600 hover:text-blue-500">
               Forgot password?
             </Link>
-          </div>
+          </div>*/}
 
           <button
             type="submit"
@@ -107,14 +107,14 @@ export default function Login() {
           </button>
         </form>
 
-        <div className="mt-8 text-center">
+       {/*<div className="mt-8 text-center">
           <p className="text-gray-600">
             Don't have an account?{' '}
             <Link to="/signup" className="text-blue-500 hover:text-blue-600 font-semibold">
               Sign up
             </Link>
           </p>
-        </div>
+        </div>*/}
       </div>
     </div>
   );

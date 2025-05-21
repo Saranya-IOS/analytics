@@ -19,6 +19,7 @@ export default function Users() {
         throw new Error('Failed to fetch users');
       }
       const data = await response.json();
+      console.log("Users", data);
       setUsers(data.data);
     } catch (err) {
       setError(err.message);
@@ -62,31 +63,37 @@ export default function Users() {
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 tracking-wider">
+                   User Name
+                </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   User ID
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 tracking-wider">
-                  Full Name
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Platform
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Email
+                  Device
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  First Seen
+                  City
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Last Seen
+                  Last Login
                 </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {users.map((user, index) => (
                 <tr key={index}>
-                  <td className="px-6 py-4 whitespace-nowrap">{user.user_id}</td>
                   <td className="px-6 py-4 whitespace-nowrap">{user.full_name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{user.user_email}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{user.user_id}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{user.platform}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {new Date(user.created_at.$date).toLocaleDateString()}
+                    {user.model}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {user.city}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {new Date(user.last_login.$date).toLocaleDateString()}

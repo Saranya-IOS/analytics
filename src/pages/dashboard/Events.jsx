@@ -86,8 +86,10 @@ export default function Events() {
               className="w-full rounded-lg border border-gray-300 p-2"
             >
               <option value="">All Events</option>
-              <option value="ACTION_EVENT">Action Event</option>
-              <option value="GEN_EVENT">General Event</option>
+              <option value="ACTION_EVENT">Action Events</option>
+              <option value="GEN_EVENT">General Events</option>
+              <option value="USER">User Events</option>
+              <option value="APP_FUNCTIONS">App Events</option>
             </select>
           </div>
 

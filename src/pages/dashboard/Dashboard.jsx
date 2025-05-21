@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LayoutDashboard, BarChart2, Users as UsersIcon, LogOut } from 'lucide-react';
+import { LayoutDashboard, BarChart2, Users as UsersIcon, FileText, Settings as SettingsIcon, LogOut, Zap, Clock, Bug } from 'lucide-react';
 import TimelineChart from '../../components/graphs/TimelineChart';
 import TopPagesChart from '../../components/graphs/TopPagesChart';
 import EventDistributionChart from '../../components/graphs/EventDistributionChart';
 import UserInteractionsChart from '../../components/graphs/UserInteractionsChart';
 import ScreenVisitedChart from '../../components/graphs/ScreenVisitedChart';
 import Events from './Events';
-import Reports from './Reports';
 import Settings from './Settings';
 import Users from './Users';
+import AlertModal from '../../templates/components/AlertComponent';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -25,6 +25,25 @@ export default function Dashboard() {
   const [userInteractions, setUserInteractions] = useState({ labels: [], datasets: [] });
   const [screenVisited, setScreenVisited] = useState([]);
   const [logoBlob, setLogoBlob] = useState(null);
+
+
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
+  const handleLogout = () => {
+    setShowLogoutConfirm(true);
+  };
+
+  const confirmLogout = () => {
+    setShowLogoutConfirm(false);
+    // your logout logic here
+    localStorage.removeItem('token');
+    localStorage.removeItem('userData');
+    navigate('/login');
+  };
+
+  const cancelLogout = () => {
+    setShowLogoutConfirm(false);
+  };
 
   const fetchLogo = async (account_id) => {
     try {
@@ -69,7 +88,7 @@ export default function Dashboard() {
     }
     fetchAllData();
     if (userData.account_details && userData.account_details.length > 0) {
-      let accountDetails = userData.account_details[0]  
+      let accountDetails = userData.account_details[0]
       fetchLogo(accountDetails.account_id);
     }
   }, []);
@@ -135,6 +154,7 @@ export default function Dashboard() {
     try {
       const response = await fetch('http://localhost:5000/api/analytics/top_screens');
       const data = await response.json();
+      console.log("Top Pages Data", data);
       setTopPages(data);
     } catch (error) {
       console.error('Error fetching top pages:', error);
@@ -180,6 +200,7 @@ export default function Dashboard() {
     try {
       const response = await fetch('http://localhost:5000/api/analytics/screen_visited');
       const data = await response.json();
+      console.log("Screen Visited Chart Data:", data);
       setScreenVisited(data);
     } catch (error) {
       console.error('Error fetching screen visited:', error);
@@ -190,39 +211,57 @@ export default function Dashboard() {
     setActiveTab(tab);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('userData');
-    navigate('/login');
-  };
-
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
         return (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-xl font-semibold mb-2">Total Users</h3>
+              <div className="relative bg-white rounded-lg shadow p-6">
+
+                {/* Icon */}
+                <div className="absolute top-4 right-4">
+                  <UsersIcon className="w-6 h-6 text-blue-500" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Active Users</h3>
                 <p className="text-3xl font-bold">20</p>
-                <p className="text-red-500 text-sm mt-2">↓ 3.1% vs last period</p>
+                <p className="text-red-500 text-sm mt-2">↓ 3.1% from Last Week</p>
               </div>
-              <div className="bg-white rounded-lg shadow p-6">
+
+              <div className="relative bg-white rounded-lg shadow p-6">
+
+                {/* Icon */}
+                <div className="absolute top-4 right-4">
+                  <Zap className="w-6 h-6 text-yellow-500" />
+                </div>
                 <h3 className="text-xl font-semibold mb-2">Total Events</h3>
                 <p className="text-3xl font-bold">20000</p>
-                <p className="text-green-500 text-sm mt-2">↑ 15.4% vs last period</p>
+                <p className="text-green-500 text-sm mt-2">↑ 15.4% from Last Week</p>
               </div>
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-xl font-semibold mb-2">Total Revenue</h3>
-                <p className="text-3xl font-bold">$12,345</p>
-                <p className="text-red-500 text-sm mt-2">↓ 3.1% vs last period</p>
+
+              <div className="relative bg-white rounded-lg shadow p-6">
+
+                {/* Icon */}
+                <div className="absolute top-4 right-4">
+                  <Clock className="w-6 h-6 text-purple-500" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Average Session duration</h3>
+                <p className="text-3xl font-bold">39 Minutes</p>
+                <p className="text-red-500 text-sm mt-2">↓ 12.1% from Last Week</p>
               </div>
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-xl font-semibold mb-2">Conversion Rate</h3>
-                <p className="text-3xl font-bold">2.4%</p>
-                <p className="text-green-500 text-sm mt-2">↑ 15.4% vs last period</p>
-              </div> 
+
+              <div className="relative bg-white rounded-lg shadow p-6">
+
+                {/* Icon */}
+                <div className="absolute top-4 right-4">
+                  <Bug className="w-6 h-6 text-red-500" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Crash Rate</h3>
+                <p className="text-3xl font-bold">9.4%</p>
+                <p className="text-green-500 text-sm mt-2">↓ 7.1%  vs last period</p>
+              </div>
             </div>
+
 
             <div className="mt-6">
               <TimelineChart data={timelineData} />
@@ -259,15 +298,24 @@ export default function Dashboard() {
       {/* Sidebar */}
       <div className={`fixed inset-y-0 left-0 w-64 bg-gray-900 text-white transition-transform duration-200 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="p-6">
-          <div className="flex flex-col items-center space-y-4">
+          <div className="flex flex-col items-center gap-4 pt-8 pb-6 border-b border-gray-800">
             {logoBlob && (
-              <img 
-                src={`data:image/png;base64,${logoBlob}`}
-                alt="Company Logo" 
-                className="w-32 h-auto"
-              />
+              /* Gradient ring + drop shadow */
+              <div className="relative p-[5px] rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 shadow-lg">
+                {/* Actual logo */}
+                <img
+                  src={`data:image/png;base64,${logoBlob}`}
+                  alt="Company Logo"
+                  className="w-32 h-32 rounded-full object-contain bg-white p-2"
+                />
+              </div>
             )}
-            <span className="text-2xl font-bold">ServiceKey Analytics</span>
+
+            {/* App name – vertically stacked below logo */}
+            <div className="text-center leading-snug">
+              <h1 className="text-2xl font-semibold tracking-wide text-white">ServiceKey</h1>
+              <h1 className="text-2xl font-semibold tracking-wide text-indigo-400">Analytics</h1>
+            </div>
           </div>
         </div>
         <nav className="mt-6">
@@ -289,6 +337,20 @@ export default function Dashboard() {
               className={`w-full flex items-center space-x-2 py-2 px-4 rounded-lg ${activeTab === 'users' ? 'bg-blue-600' : 'hover:bg-gray-800'}`}
             ><UsersIcon className="w-5 h-5" />
               <span>Users</span>
+            </button>
+
+            {/* <button 
+              onClick={() => handleTabChange('reports')}
+              className={`w-full flex items-center space-x-2 py-2 px-4 rounded-lg ${activeTab === 'reports' ? 'bg-blue-600' : 'hover:bg-gray-800'}`}
+            ><FileText className="w-5 h-5" />
+              <span>Reports</span>
+            </button> */}
+
+            <button
+              onClick={() => handleTabChange('settings')}
+              className={`w-full flex items-center space-x-2 py-2 px-4 rounded-lg ${activeTab === 'settings' ? 'bg-blue-600' : 'hover:bg-gray-800'}`}
+            ><SettingsIcon className="w-5 h-5" />
+              <span>Settings</span>
             </button>
             <button
               onClick={handleLogout}
@@ -312,8 +374,10 @@ export default function Dashboard() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-700">{user && (user.first_name + " " + user.last_name)}</span>
+            <div className="flex items-center space-x-2">
+              <span className="text-l text-gray-800 font-medium">
+                {user && (user.first_name + " " + user.last_name)}
+              </span>
             </div>
           </div>
         </header>
@@ -322,6 +386,15 @@ export default function Dashboard() {
           {renderContent()}
         </main>
       </div>
+
+      {/* 🔔 Inject your modal here */}
+      <AlertModal
+        isOpen={showLogoutConfirm}
+        title="Confirm Logout"
+        message="Are you sure you want to log out?"
+        onConfirm={confirmLogout}
+        onCancel={cancelLogout}
+      />
     </div>
   );
 }

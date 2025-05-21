@@ -15,7 +15,7 @@ def encode_image_to_base64(path):
     with open(path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode("utf-8")
 
-def seed_accounts(mongo_uri="mongodb://admin:secret@localhost:27017/dashboardDB?authSource=admin", db_name="dashboardDB", logo_dir="./logos"):
+def seed_accounts(mongo_uri="mongodb://localhost:27017/", db_name="dashboardDB", logo_dir="./logos"):
     client = MongoClient(mongo_uri)
     db = client[db_name]
     accounts_collection = db["accounts"]

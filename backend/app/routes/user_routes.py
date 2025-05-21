@@ -29,19 +29,18 @@ def register_user():
     mongo.db.app_users.insert_one(user)
     return jsonify({"message": "User registered successfully"}), 201
 
+
 @user_bp.route("/list", methods=["GET"])
 def list_app_users():
     try:
-        # Pagination params
+        # ---------------- Pagination ----------------
         page = int(request.args.get("page", 1))
         limit = int(request.args.get("limit", 20))
         skip = (page - 1) * limit
-
-        # Optional filters
+        # ---------------- Filters on app_users ----------------
         user_id = request.args.get("user_id")
         user_email = request.args.get("user_email")
         account_id = request.args.get("account_id")
-
         query = {}
         if user_id:
             query["user_id"] = user_id
@@ -49,23 +48,64 @@ def list_app_users():
             query["user_email"] = user_email
         if account_id:
             query["account_details.account_id"] = account_id
-
-        # Total count for pagination
+        # ---------------- Total for pagination ----------------
         total = mongo.db.app_users.count_documents(query)
-
-        # Fetch paginated results
-        users = list(
-            mongo.db.app_users.find(query, {"_id": 0})
-            .skip(skip)
-            .limit(limit)
+        # ---------------- Aggregation pipeline ----------------
+        pipeline = [
+            {"$match": query},
+            # Join with user_sessions
+            {
+                "$lookup": {
+                    "from": "user_sessions",
+                    "let": {"uid": "$user_id"},
+                    "pipeline": [
+                        {"$match": {"$expr": {"$eq": ["$user_id", "$$uid"]}}},
+                        {"$sort": {"started_at": -1}},
+                        {"$limit": 1},
+                        {
+                            "$project": {
+                                "_id": 0,
+                                "platform": "$device_details.platform",
+                                "model": "$device_details.model",
+                                "country": "$location.country",
+                                "city": "$location.city",
+                            }
+                        },
+                    ],
+                    "as": "latest_session",
+                }
+            },
+            # Flatten the single-element array
+            {
+                "$unwind": {
+                    "path": "$latest_session",
+                    "preserveNullAndEmptyArrays": True,
+                }
+            },
+            # Shape the final output
+            {
+                "$project": {
+                    "_id": 0,
+                    "user_id": 1,
+                    "user_email": 1,
+                    "full_name": 1,
+                    "created_at": 1,
+                    "last_login": 1,
+                    "account_details": 1,
+                    "platform": "$latest_session.platform",
+                    "model": "$latest_session.model",
+                    "country": "$latest_session.country",
+                    "city": "$latest_session.city",
+                }
+            },
+            # Pagination
+            {"$skip": skip},
+            {"$limit": limit},
+        ]
+        users = list(mongo.db.app_users.aggregate(pipeline))
+        return (
+            jsonify({"page": page, "limit": limit, "total": total, "data": users}),
+            200,
         )
-
-        return jsonify({
-            "page": page,
-            "limit": limit,
-            "total": total,
-            "data": users
-        }), 200
-
     except Exception as e:
         return jsonify({"error": str(e)}), 500

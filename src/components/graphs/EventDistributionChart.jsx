@@ -44,7 +44,7 @@ export default function EventDistributionChart({ data, brightColors, dullColors 
           legend: { display: false },
           tooltip: {
             enabled: false,
-            external: function(context) {
+            external: function (context) {
               const tooltipModel = context.tooltip;
 
               if (tooltipModel.opacity === 0) {
@@ -66,8 +66,8 @@ export default function EventDistributionChart({ data, brightColors, dullColors 
               const tooltipX = chartCenterX + Math.cos(angle) * radius;
               const tooltipY = chartCenterY + Math.sin(angle) * radius;
 
-              tooltipBox.innerHTML = 
-              `<div class="title" style="font-weight: 600; font-size: 15px; margin-bottom: 5px;">
+              tooltipBox.innerHTML =
+                `<div class="title" style="font-weight: 600; font-size: 15px; margin-bottom: 5px;">
                   ${event.event_name}
               </div>
               <div class="metrics" style="font-size: 14px; color: #333333; margin-bottom: 2px;">
@@ -104,9 +104,23 @@ export default function EventDistributionChart({ data, brightColors, dullColors 
 
     <div
       className="card"
-      /* Use existing “card” class from your stylesheet for radius & shadow */
+    /* Use existing “card” class from your stylesheet for radius & shadow */
     >
-      <h2 className="text-xl font-bold mb-4 text-left">Event Counts</h2>
+
+      {/* Flexbox layout for title and actions */}
+      <div className="flex justify-between items-center mb-3">
+        <div className="card-title">Events Timeline</div>
+        <div className="card-actions">
+          <div className="relative group">
+            <button className="btn btn-secondary btn-sm flex items-center">
+              <i className="fas fa-download mr-1"></i> Export
+            </button>
+            <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2 py-1 text-sm text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 whitespace-nowrap">
+              In Progress
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div className="flex flex-col items-center bg-gray-100 rounded-lg p-6">
 
@@ -131,7 +145,7 @@ export default function EventDistributionChart({ data, brightColors, dullColors 
           <canvas
             id="events-distribution-chart"
             className="w-[350px] h-[350]"
-            />
+          />
           <div
             id="tooltip-box"
             className="absolute hidden bg-white p-2 rounded-lg shadow-lg border border-gray-200"
